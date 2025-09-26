@@ -777,6 +777,90 @@ module BooleanBuilder = struct
   let null_count t = C.BooleanBuilder.null_count t
 end
 
+module Date32Builder = struct
+  type t = C.Date32Builder.t
+
+  let create () =
+    let builder = C.Date32Builder.create () in
+    Gc.finalise C.Date32Builder.free builder;
+    builder
+
+  let append t value = C.Date32Builder.append t value
+  let append_null ?(n=1) t = C.Date32Builder.append_null t n
+  let length t = C.Date32Builder.length t
+  let null_count t = C.Date32Builder.null_count t
+end
+
+module Date64Builder = struct
+  type t = C.Date64Builder.t
+
+  let create () =
+    let builder = C.Date64Builder.create () in
+    Gc.finalise C.Date64Builder.free builder;
+    builder
+
+  let append t value = C.Date64Builder.append t value
+  let append_null ?(n=1) t = C.Date64Builder.append_null t n
+  let length t = C.Date64Builder.length t
+  let null_count t = C.Date64Builder.null_count t
+end
+
+module Time32Builder = struct
+  type t = C.Time32Builder.t
+
+  let create ?(unit=0) () =
+    let builder = C.Time32Builder.create unit in
+    Gc.finalise C.Time32Builder.free builder;
+    builder
+
+  let append t value = C.Time32Builder.append t value
+  let append_null ?(n=1) t = C.Time32Builder.append_null t n
+  let length t = C.Time32Builder.length t
+  let null_count t = C.Time32Builder.null_count t
+end
+
+module Time64Builder = struct
+  type t = C.Time64Builder.t
+
+  let create ?(unit=0) () =
+    let builder = C.Time64Builder.create unit in
+    Gc.finalise C.Time64Builder.free builder;
+    builder
+
+  let append t value = C.Time64Builder.append t value
+  let append_null ?(n=1) t = C.Time64Builder.append_null t n
+  let length t = C.Time64Builder.length t
+  let null_count t = C.Time64Builder.null_count t
+end
+
+module TimestampBuilder = struct
+  type t = C.TimestampBuilder.t
+
+  let create ?(unit=3) ?(timezone="") () =
+    let builder = C.TimestampBuilder.create unit timezone in
+    Gc.finalise C.TimestampBuilder.free builder;
+    builder
+
+  let append t value = C.TimestampBuilder.append t value
+  let append_null ?(n=1) t = C.TimestampBuilder.append_null t n
+  let length t = C.TimestampBuilder.length t
+  let null_count t = C.TimestampBuilder.null_count t
+end
+
+module DurationBuilder = struct
+  type t = C.DurationBuilder.t
+
+  let create ?(unit=3) () =
+    let builder = C.DurationBuilder.create unit in
+    Gc.finalise C.DurationBuilder.free builder;
+    builder
+
+  let append t value = C.DurationBuilder.append t value
+  let append_null ?(n=1) t = C.DurationBuilder.append_null t n
+  let length t = C.DurationBuilder.length t
+  let null_count t = C.DurationBuilder.null_count t
+end
+
 module Builder = struct
   type t =
     | Double of DoubleBuilder.t

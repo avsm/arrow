@@ -5,7 +5,7 @@ module C (F : Cstubs.FOREIGN) = struct
   open! F
 
   module ArrowSchema = struct
-    type t = [ `schema ] structure
+    type t = [ `Schema ] structure
 
     let t : t typ = structure "ArrowSchema"
     let format = field t "format" (ptr char)
@@ -23,7 +23,7 @@ module C (F : Cstubs.FOREIGN) = struct
   end
 
   module ArrowArray = struct
-    type t = [ `array ] structure
+    type t = [ `Array ] structure
 
     let t : t typ = structure "ArrowArray"
     let length = field t "length" int64_t
@@ -299,6 +299,78 @@ module C (F : Cstubs.FOREIGN) = struct
     let free = foreign "free_boolean_builder" (t @-> returning void)
     let length = foreign "length_boolean_builder" (t @-> returning int64_t)
     let null_count = foreign "null_count_boolean_builder" (t @-> returning int64_t)
+  end
+
+  module Date32Builder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_date32_builder" (void @-> returning t)
+    let append = foreign "append_date32_builder" (t @-> int32_t @-> returning void)
+    let append_null = foreign "append_null_date32_builder" (t @-> int @-> returning void)
+    let free = foreign "free_date32_builder" (t @-> returning void)
+    let length = foreign "length_date32_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_date32_builder" (t @-> returning int64_t)
+  end
+
+  module Date64Builder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_date64_builder" (void @-> returning t)
+    let append = foreign "append_date64_builder" (t @-> int64_t @-> returning void)
+    let append_null = foreign "append_null_date64_builder" (t @-> int @-> returning void)
+    let free = foreign "free_date64_builder" (t @-> returning void)
+    let length = foreign "length_date64_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_date64_builder" (t @-> returning int64_t)
+  end
+
+  module Time32Builder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_time32_builder" (int @-> returning t)
+    let append = foreign "append_time32_builder" (t @-> int32_t @-> returning void)
+    let append_null = foreign "append_null_time32_builder" (t @-> int @-> returning void)
+    let free = foreign "free_time32_builder" (t @-> returning void)
+    let length = foreign "length_time32_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_time32_builder" (t @-> returning int64_t)
+  end
+
+  module Time64Builder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_time64_builder" (int @-> returning t)
+    let append = foreign "append_time64_builder" (t @-> int64_t @-> returning void)
+    let append_null = foreign "append_null_time64_builder" (t @-> int @-> returning void)
+    let free = foreign "free_time64_builder" (t @-> returning void)
+    let length = foreign "length_time64_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_time64_builder" (t @-> returning int64_t)
+  end
+
+  module TimestampBuilder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_timestamp_builder" (int @-> string @-> returning t)
+    let append = foreign "append_timestamp_builder" (t @-> int64_t @-> returning void)
+    let append_null = foreign "append_null_timestamp_builder" (t @-> int @-> returning void)
+    let free = foreign "free_timestamp_builder" (t @-> returning void)
+    let length = foreign "length_timestamp_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_timestamp_builder" (t @-> returning int64_t)
+  end
+
+  module DurationBuilder = struct
+    type t = unit ptr
+
+    let t : t typ = ptr void
+    let create = foreign "create_duration_builder" (int @-> returning t)
+    let append = foreign "append_duration_builder" (t @-> int64_t @-> returning void)
+    let append_null = foreign "append_null_duration_builder" (t @-> int @-> returning void)
+    let free = foreign "free_duration_builder" (t @-> returning void)
+    let length = foreign "length_duration_builder" (t @-> returning int64_t)
+    let null_count = foreign "null_count_duration_builder" (t @-> returning int64_t)
   end
 
   let make_table =

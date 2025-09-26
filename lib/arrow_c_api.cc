@@ -799,6 +799,64 @@ BooleanBuilderPtr *create_boolean_builder() {
   return new BooleanBuilderPtr(builder);
 }
 
+Date32BuilderPtr *create_date32_builder() {
+  auto builder = std::make_shared<arrow::Date32Builder>();
+  return new Date32BuilderPtr(builder);
+}
+
+Date64BuilderPtr *create_date64_builder() {
+  auto builder = std::make_shared<arrow::Date64Builder>();
+  return new Date64BuilderPtr(builder);
+}
+
+Time32BuilderPtr *create_time32_builder(int unit) {
+  // unit: 0 = second, 1 = millisecond
+  auto time_type = unit == 0 ?
+    arrow::time32(arrow::TimeUnit::SECOND) :
+    arrow::time32(arrow::TimeUnit::MILLI);
+  auto builder = std::make_shared<arrow::Time32Builder>(time_type, arrow::default_memory_pool());
+  return new Time32BuilderPtr(builder);
+}
+
+Time64BuilderPtr *create_time64_builder(int unit) {
+  // unit: 0 = microsecond, 1 = nanosecond
+  auto time_type = unit == 0 ?
+    arrow::time64(arrow::TimeUnit::MICRO) :
+    arrow::time64(arrow::TimeUnit::NANO);
+  auto builder = std::make_shared<arrow::Time64Builder>(time_type, arrow::default_memory_pool());
+  return new Time64BuilderPtr(builder);
+}
+
+TimestampBuilderPtr *create_timestamp_builder(int unit, const char* timezone) {
+  // unit: 0 = second, 1 = millisecond, 2 = microsecond, 3 = nanosecond
+  arrow::TimeUnit::type time_unit;
+  switch(unit) {
+    case 0: time_unit = arrow::TimeUnit::SECOND; break;
+    case 1: time_unit = arrow::TimeUnit::MILLI; break;
+    case 2: time_unit = arrow::TimeUnit::MICRO; break;
+    case 3: time_unit = arrow::TimeUnit::NANO; break;
+    default: time_unit = arrow::TimeUnit::NANO;
+  }
+  auto timestamp_type = arrow::timestamp(time_unit, timezone ? timezone : "");
+  auto builder = std::make_shared<arrow::TimestampBuilder>(timestamp_type, arrow::default_memory_pool());
+  return new TimestampBuilderPtr(builder);
+}
+
+DurationBuilderPtr *create_duration_builder(int unit) {
+  // unit: 0 = second, 1 = millisecond, 2 = microsecond, 3 = nanosecond
+  arrow::TimeUnit::type time_unit;
+  switch(unit) {
+    case 0: time_unit = arrow::TimeUnit::SECOND; break;
+    case 1: time_unit = arrow::TimeUnit::MILLI; break;
+    case 2: time_unit = arrow::TimeUnit::MICRO; break;
+    case 3: time_unit = arrow::TimeUnit::NANO; break;
+    default: time_unit = arrow::TimeUnit::NANO;
+  }
+  auto duration_type = arrow::duration(time_unit);
+  auto builder = std::make_shared<arrow::DurationBuilder>(duration_type, arrow::default_memory_pool());
+  return new DurationBuilderPtr(builder);
+}
+
 void append_int32_builder(Int32BuilderPtr* ptr, int32_t v) {
   OCAML_BEGIN_PROTECT_EXN
 
@@ -908,6 +966,59 @@ void append_boolean_builder(BooleanBuilderPtr* ptr, int v) {
   OCAML_END_PROTECT_EXN
 }
 
+void append_date32_builder(Date32BuilderPtr* ptr, int32_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_date64_builder(Date64BuilderPtr* ptr, int64_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_time32_builder(Time32BuilderPtr* ptr, int32_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_time64_builder(Time64BuilderPtr* ptr, int64_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_timestamp_builder(TimestampBuilderPtr* ptr, int64_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_duration_builder(DurationBuilderPtr* ptr, int64_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
 
 void append_null_int32_builder(Int32BuilderPtr* ptr, int n) {
   OCAML_BEGIN_PROTECT_EXN
@@ -1019,6 +1130,59 @@ void append_null_boolean_builder(BooleanBuilderPtr* ptr, int n) {
   OCAML_END_PROTECT_EXN
 }
 
+void append_null_date32_builder(Date32BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_date64_builder(Date64BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_time32_builder(Time32BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_time64_builder(Time64BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_timestamp_builder(TimestampBuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_duration_builder(DurationBuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
 
 void free_int32_builder(Int32BuilderPtr* ptr) {
   if (ptr != nullptr) delete ptr;
@@ -1068,6 +1232,30 @@ void free_boolean_builder(BooleanBuilderPtr* ptr) {
   if (ptr != nullptr) delete ptr;
 }
 
+void free_date32_builder(Date32BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_date64_builder(Date64BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_time32_builder(Time32BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_time64_builder(Time64BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_timestamp_builder(TimestampBuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_duration_builder(DurationBuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
 int64_t length_int32_builder(Int32BuilderPtr* ptr) {
   return (*ptr)->length();
 }
@@ -1113,6 +1301,30 @@ int64_t length_boolean_builder(BooleanBuilderPtr* ptr) {
   return (*ptr)->length();
 }
 
+int64_t length_date32_builder(Date32BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_date64_builder(Date64BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_time32_builder(Time32BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_time64_builder(Time64BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_timestamp_builder(TimestampBuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_duration_builder(DurationBuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
 int64_t null_count_int32_builder(Int32BuilderPtr* ptr) {
   return (*ptr)->null_count();
 }
@@ -1155,6 +1367,30 @@ int64_t null_count_float_builder(FloatBuilderPtr* ptr) {
 }
 
 int64_t null_count_boolean_builder(BooleanBuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_date32_builder(Date32BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_date64_builder(Date64BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_time32_builder(Time32BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_time64_builder(Time64BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_timestamp_builder(TimestampBuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_duration_builder(DurationBuilderPtr* ptr) {
   return (*ptr)->null_count();
 }
 

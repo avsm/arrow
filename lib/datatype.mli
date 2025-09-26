@@ -21,16 +21,16 @@ type t =
       ; scale : int
       }
   | Fixed_width_binary of { bytes : int }
-  | Date32 of [ `days ]
-  | Date64 of [ `milliseconds ]
-  | Time32 of [ `seconds | `milliseconds ]
-  | Time64 of [ `microseconds | `nanoseconds ]
+  | Date32 of [ `Days ]
+  | Date64 of [ `Milliseconds ]
+  | Time32 of [ `Seconds | `Milliseconds ]
+  | Time64 of [ `Microseconds | `Nanoseconds ]
   | Timestamp of
-      { precision : [ `seconds | `milliseconds | `microseconds | `nanoseconds ]
+      { precision : [ `Seconds | `Milliseconds | `Microseconds | `Nanoseconds ]
       ; timezone : string
       }
-  | Duration of [ `seconds | `milliseconds | `microseconds | `nanoseconds ]
-  | Interval of [ `months | `days_time ]
+  | Duration of [ `Seconds | `Milliseconds | `Microseconds | `Nanoseconds ]
+  | Interval of [ `Months | `Days_time ]
   | Struct
   | Map
   | Unknown of string

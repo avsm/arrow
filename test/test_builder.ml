@@ -239,6 +239,76 @@ let test_builder_edge_cases () =
   Alcotest.(check int) "All nulls length" 5 (Builder.UInt16.length all_nulls);
   Alcotest.(check int) "All nulls null count" 5 (Builder.UInt16.null_count all_nulls)
 
+let test_datetime_builders () =
+  (* Test Date32 builder - days since Unix epoch *)
+  let date32_builder = Builder.Date32.create () in
+  Builder.Date32.append date32_builder 0l;  (* 1970-01-01 *)
+  Builder.Date32.append date32_builder 18628l;  (* ~2021-01-01 *)
+  Builder.Date32.append_null date32_builder;
+  Builder.Date32.append_opt date32_builder (Some 19000l);
+
+  Alcotest.(check int) "Date32 builder length" 4 (Builder.Date32.length date32_builder);
+  Alcotest.(check int) "Date32 builder null count" 1 (Builder.Date32.null_count date32_builder);
+
+  (* Test Date64 builder - milliseconds since Unix epoch *)
+  let date64_builder = Builder.Date64.create () in
+  Builder.Date64.append date64_builder 0L;  (* 1970-01-01 *)
+  Builder.Date64.append date64_builder 1609459200000L;  (* 2021-01-01 *)
+  Builder.Date64.append_null date64_builder;
+  Builder.Date64.append_opt date64_builder None;
+
+  Alcotest.(check int) "Date64 builder length" 4 (Builder.Date64.length date64_builder);
+  Alcotest.(check int) "Date64 builder null count" 2 (Builder.Date64.null_count date64_builder);
+
+  (* Test Time32 builder - seconds or milliseconds since midnight *)
+  let time32_builder = Builder.Time32.create () in
+  Builder.Time32.append time32_builder 0l;  (* midnight *)
+  Builder.Time32.append time32_builder 3600l;  (* 1 hour *)
+  Builder.Time32.append time32_builder 43200l;  (* noon *)
+  Builder.Time32.append_null time32_builder;
+
+  Alcotest.(check int) "Time32 builder length" 4 (Builder.Time32.length time32_builder);
+  Alcotest.(check int) "Time32 builder null count" 1 (Builder.Time32.null_count time32_builder);
+
+  (* Test Time64 builder - microseconds or nanoseconds since midnight *)
+  let time64_builder = Builder.Time64.create () in
+  Builder.Time64.append time64_builder 0L;  (* midnight *)
+  Builder.Time64.append time64_builder 3600000000L;  (* 1 hour in microseconds *)
+  Builder.Time64.append_null time64_builder;
+  Builder.Time64.append_opt time64_builder (Some 43200000000L);  (* noon in microseconds *)
+
+  Alcotest.(check int) "Time64 builder length" 4 (Builder.Time64.length time64_builder);
+  Alcotest.(check int) "Time64 builder null count" 1 (Builder.Time64.null_count time64_builder);
+
+  (* Test Timestamp builder - nanoseconds since Unix epoch *)
+  let timestamp_builder = Builder.Timestamp.create () in
+  Builder.Timestamp.append timestamp_builder 0L;
+  Builder.Timestamp.append timestamp_builder 1609459200000000000L;  (* 2021-01-01 in nanoseconds *)
+  Builder.Timestamp.append_null timestamp_builder;
+  Builder.Timestamp.append_opt timestamp_builder (Some 1640995200000000000L);  (* 2022-01-01 *)
+
+  Alcotest.(check int) "Timestamp builder length" 4 (Builder.Timestamp.length timestamp_builder);
+  Alcotest.(check int) "Timestamp builder null count" 1 (Builder.Timestamp.null_count timestamp_builder);
+
+  (* Test Duration builder - time duration *)
+  let duration_builder = Builder.Duration.create () in
+  Builder.Duration.append duration_builder 1000000000L;  (* 1 second in nanoseconds *)
+  Builder.Duration.append duration_builder 60000000000L;  (* 1 minute in nanoseconds *)
+  Builder.Duration.append_null duration_builder;
+  Builder.Duration.append_opt duration_builder (Some 3600000000000L);  (* 1 hour *)
+
+  Alcotest.(check int) "Duration builder length" 4 (Builder.Duration.length duration_builder);
+  Alcotest.(check int) "Duration builder null count" 1 (Builder.Duration.null_count duration_builder);
+
+  (* Test multiple nulls *)
+  let date_null_test = Builder.Date32.create () in
+  Builder.Date32.append date_null_test 100l;
+  Builder.Date32.append_null ~n:3 date_null_test;
+  Builder.Date32.append date_null_test 200l;
+
+  Alcotest.(check int) "Date32 multiple nulls length" 5 (Builder.Date32.length date_null_test);
+  Alcotest.(check int) "Date32 multiple nulls count" 3 (Builder.Date32.null_count date_null_test)
+
 let test_comprehensive_builders () =
   (* Comprehensive test of multiple builder types working together *)
   let col1 = Wrapper.StringBuilder.create () in
@@ -289,6 +359,7 @@ let () =
       test_case "Float and Boolean builders" `Quick test_float_and_boolean_builders;
       test_case "Small int builders (Int8/Int16)" `Quick test_small_int_builders;
       test_case "Unsigned int builders" `Quick test_unsigned_int_builders;
+      test_case "Datetime builders" `Quick test_datetime_builders;
       test_case "Builder edge cases" `Quick test_builder_edge_cases;
       test_case "Row-based builder" `Quick test_row_based_builder;
       test_case "Row builder module" `Quick test_row_builder;

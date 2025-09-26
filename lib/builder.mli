@@ -62,6 +62,30 @@ module Boolean : sig
   include Intf with type elem := bool and type t = C_wrapper.BooleanBuilder.t
 end
 
+module Date32 : sig
+  include Intf with type elem := int32 and type t = C_wrapper.Date32Builder.t
+end
+
+module Date64 : sig
+  include Intf with type elem := int64 and type t = C_wrapper.Date64Builder.t
+end
+
+module Time32 : sig
+  include Intf with type elem := int32 and type t = C_wrapper.Time32Builder.t
+end
+
+module Time64 : sig
+  include Intf with type elem := int64 and type t = C_wrapper.Time64Builder.t
+end
+
+module Timestamp : sig
+  include Intf with type elem := int64 and type t = C_wrapper.TimestampBuilder.t
+end
+
+module Duration : sig
+  include Intf with type elem := int64 and type t = C_wrapper.DurationBuilder.t
+end
+
 val make_table : (string * Wrapper.Builder.t) list -> Table.t
 
 type ('row, 'elem, 'col_type) col =
