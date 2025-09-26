@@ -15,11 +15,11 @@ module Double : sig
 end
 
 module Int32 : sig
-  include Intf with type elem := Int32.t and type t = Wrapper.Int32Builder.t
+  include Intf with type elem := int32 and type t = Wrapper.Int32Builder.t
 end
 
 module Int64 : sig
-  include Intf with type elem := Int64.t and type t = Wrapper.Int64Builder.t
+  include Intf with type elem := int64 and type t = Wrapper.Int64Builder.t
 end
 
 module NativeInt : sig
@@ -28,6 +28,38 @@ end
 
 module String : sig
   include Intf with type elem := string and type t = Wrapper.StringBuilder.t
+end
+
+module Int8 : sig
+  include Intf with type elem := int and type t = C_wrapper.Int8Builder.t
+end
+
+module Int16 : sig
+  include Intf with type elem := int and type t = C_wrapper.Int16Builder.t
+end
+
+module UInt8 : sig
+  include Intf with type elem := int and type t = C_wrapper.UInt8Builder.t
+end
+
+module UInt16 : sig
+  include Intf with type elem := int and type t = C_wrapper.UInt16Builder.t
+end
+
+module UInt32 : sig
+  include Intf with type elem := int32 and type t = C_wrapper.UInt32Builder.t
+end
+
+module UInt64 : sig
+  include Intf with type elem := int64 and type t = C_wrapper.UInt64Builder.t
+end
+
+module Float : sig
+  include Intf with type elem := float and type t = C_wrapper.FloatBuilder.t
+end
+
+module Boolean : sig
+  include Intf with type elem := bool and type t = C_wrapper.BooleanBuilder.t
 end
 
 val make_table : (string * Wrapper.Builder.t) list -> Table.t

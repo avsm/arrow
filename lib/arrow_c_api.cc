@@ -16,6 +16,7 @@
 #include "arrow_c_api.h"
 
 #include<iostream>
+#include<cstring>
 
 #include<caml/bigarray.h>
 #include<caml/mlvalues.h>
@@ -119,10 +120,34 @@ struct ArrowSchema *parquet_schema(char *filename, int64_t *num_rows) {
   return nullptr;
 }
 
+struct ArrowSchema *alloc_schema(char *format, char *name) {
+  struct ArrowSchema *schema = (struct ArrowSchema*)malloc(sizeof *schema);
+  if (schema == NULL) {
+    caml_failwith("Failed to allocate ArrowSchema");
+    return NULL;
+  }
+
+  // Initialize all fields to safe defaults
+  schema->format = format ? strdup(format) : NULL;
+  schema->name = name ? strdup(name) : NULL;
+  schema->metadata = NULL;
+  schema->flags = 0;
+  schema->n_children = 0;
+  schema->children = NULL;
+  schema->dictionary = NULL;
+  schema->release = NULL;
+  schema->private_data = NULL;
+
+  return schema;
+}
+
 void free_schema(struct ArrowSchema *schema) {
   if (schema->release != NULL)
     schema->release(schema);
   schema->release = NULL;
+  // Free any allocated strings if release didn't handle them
+  if (schema->format) free((void*)schema->format);
+  if (schema->name) free((void*)schema->name);
   free(schema);
 }
 
@@ -734,6 +759,46 @@ StringBuilderPtr *create_string_builder() {
   return new StringBuilderPtr(builder);
 }
 
+Int8BuilderPtr *create_int8_builder() {
+  auto builder = std::make_shared<arrow::Int8Builder>();
+  return new Int8BuilderPtr(builder);
+}
+
+Int16BuilderPtr *create_int16_builder() {
+  auto builder = std::make_shared<arrow::Int16Builder>();
+  return new Int16BuilderPtr(builder);
+}
+
+UInt8BuilderPtr *create_uint8_builder() {
+  auto builder = std::make_shared<arrow::UInt8Builder>();
+  return new UInt8BuilderPtr(builder);
+}
+
+UInt16BuilderPtr *create_uint16_builder() {
+  auto builder = std::make_shared<arrow::UInt16Builder>();
+  return new UInt16BuilderPtr(builder);
+}
+
+UInt32BuilderPtr *create_uint32_builder() {
+  auto builder = std::make_shared<arrow::UInt32Builder>();
+  return new UInt32BuilderPtr(builder);
+}
+
+UInt64BuilderPtr *create_uint64_builder() {
+  auto builder = std::make_shared<arrow::UInt64Builder>();
+  return new UInt64BuilderPtr(builder);
+}
+
+FloatBuilderPtr *create_float_builder() {
+  auto builder = std::make_shared<arrow::FloatBuilder>();
+  return new FloatBuilderPtr(builder);
+}
+
+BooleanBuilderPtr *create_boolean_builder() {
+  auto builder = std::make_shared<arrow::BooleanBuilder>();
+  return new BooleanBuilderPtr(builder);
+}
+
 void append_int32_builder(Int32BuilderPtr* ptr, int32_t v) {
   OCAML_BEGIN_PROTECT_EXN
 
@@ -766,6 +831,78 @@ void append_string_builder(StringBuilderPtr* ptr, char* v) {
   OCAML_BEGIN_PROTECT_EXN
 
   arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_int8_builder(Int8BuilderPtr* ptr, int8_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_int16_builder(Int16BuilderPtr* ptr, int16_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_uint8_builder(UInt8BuilderPtr* ptr, uint8_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_uint16_builder(UInt16BuilderPtr* ptr, uint16_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_uint32_builder(UInt32BuilderPtr* ptr, uint32_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_uint64_builder(UInt64BuilderPtr* ptr, uint64_t v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_float_builder(FloatBuilderPtr* ptr, float v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_boolean_builder(BooleanBuilderPtr* ptr, int v) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->Append(v != 0);
   status_exn(st);
 
   OCAML_END_PROTECT_EXN
@@ -810,6 +947,78 @@ void append_null_string_builder(StringBuilderPtr* ptr, int n) {
   OCAML_END_PROTECT_EXN
 }
 
+void append_null_int8_builder(Int8BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_int16_builder(Int16BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_uint8_builder(UInt8BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_uint16_builder(UInt16BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_uint32_builder(UInt32BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_uint64_builder(UInt64BuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_float_builder(FloatBuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
+void append_null_boolean_builder(BooleanBuilderPtr* ptr, int n) {
+  OCAML_BEGIN_PROTECT_EXN
+
+  arrow::Status st = (*ptr)->AppendNulls(n);
+  status_exn(st);
+
+  OCAML_END_PROTECT_EXN
+}
+
 
 void free_int32_builder(Int32BuilderPtr* ptr) {
   if (ptr != nullptr) delete ptr;
@@ -827,6 +1036,38 @@ void free_string_builder(StringBuilderPtr* ptr) {
   if (ptr != nullptr) delete ptr;
 }
 
+void free_int8_builder(Int8BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_int16_builder(Int16BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_uint8_builder(UInt8BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_uint16_builder(UInt16BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_uint32_builder(UInt32BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_uint64_builder(UInt64BuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_float_builder(FloatBuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
+void free_boolean_builder(BooleanBuilderPtr* ptr) {
+  if (ptr != nullptr) delete ptr;
+}
+
 int64_t length_int32_builder(Int32BuilderPtr* ptr) {
   return (*ptr)->length();
 }
@@ -840,6 +1081,38 @@ int64_t length_string_builder(StringBuilderPtr* ptr) {
   return (*ptr)->length();
 }
 
+int64_t length_int8_builder(Int8BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_int16_builder(Int16BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_uint8_builder(UInt8BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_uint16_builder(UInt16BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_uint32_builder(UInt32BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_uint64_builder(UInt64BuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_float_builder(FloatBuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
+int64_t length_boolean_builder(BooleanBuilderPtr* ptr) {
+  return (*ptr)->length();
+}
+
 int64_t null_count_int32_builder(Int32BuilderPtr* ptr) {
   return (*ptr)->null_count();
 }
@@ -850,6 +1123,38 @@ int64_t null_count_double_builder(DoubleBuilderPtr* ptr) {
   return (*ptr)->null_count();
 }
 int64_t null_count_string_builder(StringBuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_int8_builder(Int8BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_int16_builder(Int16BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_uint8_builder(UInt8BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_uint16_builder(UInt16BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_uint32_builder(UInt32BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_uint64_builder(UInt64BuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_float_builder(FloatBuilderPtr* ptr) {
+  return (*ptr)->null_count();
+}
+
+int64_t null_count_boolean_builder(BooleanBuilderPtr* ptr) {
   return (*ptr)->null_count();
 }
 

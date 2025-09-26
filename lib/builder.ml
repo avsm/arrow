@@ -72,6 +72,102 @@ module Int64 = struct
   let null_count t = null_count t |> Int64.to_int
 end
 
+module Int8 = struct
+  include C_wrapper.Int8Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.Int8Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.Int8Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module Int16 = struct
+  include C_wrapper.Int16Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.Int16Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.Int16Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module UInt8 = struct
+  include C_wrapper.UInt8Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.UInt8Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.UInt8Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module UInt16 = struct
+  include C_wrapper.UInt16Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.UInt16Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.UInt16Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module UInt32 = struct
+  include C_wrapper.UInt32Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.UInt32Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.UInt32Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module UInt64 = struct
+  include C_wrapper.UInt64Builder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.UInt64Builder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.UInt64Builder.null_count t |> Stdlib.Int64.to_int
+end
+
+module Float = struct
+  include C_wrapper.FloatBuilder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.FloatBuilder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.FloatBuilder.null_count t |> Stdlib.Int64.to_int
+end
+
+module Boolean = struct
+  include C_wrapper.BooleanBuilder
+
+  let append_opt t v =
+    match v with
+    | None -> append_null t ~n:1
+    | Some v -> append t v
+
+  let length t = C_wrapper.BooleanBuilder.length t |> Stdlib.Int64.to_int
+  let null_count t = C_wrapper.BooleanBuilder.null_count t |> Stdlib.Int64.to_int
+end
+
 let make_table = Wrapper.Builder.make_table
 
 (* Simple row-based construction - no PPX dependencies *)
