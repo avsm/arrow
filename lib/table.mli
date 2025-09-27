@@ -17,10 +17,10 @@ type _ col_type =
   | Int : int col_type
   | Float : float col_type
   | Utf8 : string col_type
-  | Date : Datetime.Date.t col_type
-  | Time_ns : Datetime.Time_ns.t col_type
-  | Span_ns : Datetime.Time_ns.Span.t col_type
-  | Ofday_ns : Datetime.Time_ns.Ofday.t col_type
+  | Date : Time.Date.t col_type
+  | Time_ns : Time.Time_ns.t col_type
+  | Span_ns : Time.Time_ns.Span.t col_type
+  | Ofday_ns : Time.Time_ns.Ofday.t col_type
   | Bool : bool col_type
 
 type packed_col =

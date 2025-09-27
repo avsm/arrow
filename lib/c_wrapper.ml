@@ -46,7 +46,7 @@ module Schema = struct
   end
 
   type t =
-    { format : Datatype.t
+    { format : Type.t
     ; name : string
     ; metadata : (string * string) list
     ; flags : Flags.t
@@ -90,7 +90,7 @@ module Schema = struct
       let children = getf schema C.ArrowSchema.children in
       let children = List.init n_children (fun i -> loop (!@(children +@ i))) in
       { format =
-          getf schema C.ArrowSchema.format |> get_string |> Datatype.of_cstring
+          getf schema C.ArrowSchema.format |> get_string |> Type.of_cstring
       ; name = getf schema C.ArrowSchema.name |> get_string
       ; metadata = getf schema C.ArrowSchema.metadata |> metadata
       ; flags = getf schema C.ArrowSchema.flags |> Flags.of_cint
@@ -453,7 +453,7 @@ module Writer = struct
   let date date_array ~name =
     let ba = Bigarray.Array1.create Bigarray.int32 Bigarray.c_layout (Array.length date_array) in
     Array.iteri (fun i date ->
-      let days = Datetime.Date.to_unix_days date |> Int32.of_int in
+      let days = Time.Date.to_unix_days date |> Int32.of_int in
       ba.{i} <- days
     ) date_array;
     fixed_ba ~format:"tdD" ba ~name
@@ -462,7 +462,7 @@ module Writer = struct
     let valid = Valid.create (Array.length date_array) in
     Array.iteri (fun i -> function
       | Some date ->
-        let days = Datetime.Date.to_unix_days date |> Int32.of_int in
+        let days = Time.Date.to_unix_days date |> Int32.of_int in
         ba.{i} <- days; Valid.set_valid valid i
       | None -> ba.{i} <- 0l; Valid.set_invalid valid i
     ) date_array;
@@ -470,7 +470,7 @@ module Writer = struct
   let time_ns time_array ~name =
     let ba = Bigarray.Array1.create Bigarray.int64 Bigarray.c_layout (Array.length time_array) in
     Array.iteri (fun i time ->
-      let ns = Datetime.Time_ns.to_int64_ns_since_epoch time in
+      let ns = Time.Time_ns.to_int64_ns_since_epoch time in
       ba.{i} <- ns
     ) time_array;
     fixed_ba ~format:"tsn:UTC" ba ~name
@@ -479,7 +479,7 @@ module Writer = struct
     let valid = Valid.create (Array.length time_array) in
     Array.iteri (fun i -> function
       | Some time ->
-        let ns = Datetime.Time_ns.to_int64_ns_since_epoch time in
+        let ns = Time.Time_ns.to_int64_ns_since_epoch time in
         ba.{i} <- ns; Valid.set_valid valid i
       | None -> ba.{i} <- 0L; Valid.set_invalid valid i
     ) time_array;
@@ -487,7 +487,7 @@ module Writer = struct
   let span_ns span_array ~name =
     let ba = Bigarray.Array1.create Bigarray.int64 Bigarray.c_layout (Array.length span_array) in
     Array.iteri (fun i span ->
-      let ns = Datetime.Time_ns.Span.to_ns span in
+      let ns = Time.Time_ns.Span.to_ns span in
       ba.{i} <- ns
     ) span_array;
     fixed_ba ~format:"tDn" ba ~name
@@ -496,7 +496,7 @@ module Writer = struct
     let valid = Valid.create (Array.length span_array) in
     Array.iteri (fun i -> function
       | Some span ->
-        let ns = Datetime.Time_ns.Span.to_ns span in
+        let ns = Time.Time_ns.Span.to_ns span in
         ba.{i} <- ns; Valid.set_valid valid i
       | None -> ba.{i} <- 0L; Valid.set_invalid valid i
     ) span_array;
@@ -504,7 +504,7 @@ module Writer = struct
   let ofday_ns ofday_array ~name =
     let ba = Bigarray.Array1.create Bigarray.int64 Bigarray.c_layout (Array.length ofday_array) in
     Array.iteri (fun i ofday ->
-      let ns = Datetime.Time_ns.Ofday.to_ns_since_midnight ofday in
+      let ns = Time.Time_ns.Ofday.to_ns_since_midnight ofday in
       ba.{i} <- ns
     ) ofday_array;
     fixed_ba ~format:"ttn" ba ~name
@@ -513,7 +513,7 @@ module Writer = struct
     let valid = Valid.create (Array.length ofday_array) in
     Array.iteri (fun i -> function
       | Some ofday ->
-        let ns = Datetime.Time_ns.Ofday.to_ns_since_midnight ofday in
+        let ns = Time.Time_ns.Ofday.to_ns_since_midnight ofday in
         ba.{i} <- ns; Valid.set_valid valid i
       | None -> ba.{i} <- 0L; Valid.set_invalid valid i
     ) ofday_array;
@@ -1218,14 +1218,14 @@ module Column = struct
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (
-          let dst = Array.make num_rows (Datetime.Date.of_unix_days 0) in
+          let dst = Array.make num_rows (Time.Date.of_unix_days 0) in
           let _num_rows =
             List.fold_left (fun dst_offset chunk ->
                 let chunk = Chunk.create chunk ~fail_on_null:true ~fail_on_offset:false in
                 let data = Chunk.primitive_data_ptr chunk ~ctype:int32_t in
                 for idx = 0 to chunk.length - 1 do
                   let days = !@(data +@ idx) |> Int32.to_int in
-                  dst.(dst_offset + idx) <- Datetime.Date.of_unix_days days
+                  dst.(dst_offset + idx) <- Time.Date.of_unix_days days
                 done;
                 dst_offset + chunk.length) 0 chunks
           in
@@ -1237,14 +1237,14 @@ module Column = struct
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (
-          let dst = Array.make num_rows (Datetime.Time_ns.of_int64_ns_since_epoch 0L) in
+          let dst = Array.make num_rows (Time.Time_ns.of_int64_ns_since_epoch 0L) in
           let _num_rows =
             List.fold_left (fun dst_offset chunk ->
                 let chunk = Chunk.create chunk ~fail_on_null:true ~fail_on_offset:false in
                 let data = Chunk.primitive_data_ptr chunk ~ctype:int64_t in
                 for idx = 0 to chunk.length - 1 do
                   let ns = !@(data +@ idx) in
-                  dst.(dst_offset + idx) <- Datetime.Time_ns.of_int64_ns_since_epoch ns
+                  dst.(dst_offset + idx) <- Time.Time_ns.of_int64_ns_since_epoch ns
                 done;
                 dst_offset + chunk.length) 0 chunks
           in
@@ -1256,14 +1256,14 @@ module Column = struct
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (
-          let dst = Array.make num_rows (Datetime.Time_ns.Span.of_ns 0L) in
+          let dst = Array.make num_rows (Time.Time_ns.Span.of_ns 0L) in
           let _num_rows =
             List.fold_left (fun dst_offset chunk ->
                 let chunk = Chunk.create chunk ~fail_on_null:true ~fail_on_offset:false in
                 let data = Chunk.primitive_data_ptr chunk ~ctype:int64_t in
                 for idx = 0 to chunk.length - 1 do
                   let ns = !@(data +@ idx) in
-                  dst.(dst_offset + idx) <- Datetime.Time_ns.Span.of_ns ns
+                  dst.(dst_offset + idx) <- Time.Time_ns.Span.of_ns ns
                 done;
                 dst_offset + chunk.length) 0 chunks
           in
@@ -1275,14 +1275,14 @@ module Column = struct
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (
-          let dst = Array.make num_rows (Datetime.Time_ns.Ofday.of_ns_since_midnight 0L) in
+          let dst = Array.make num_rows (Time.Time_ns.Ofday.of_ns_since_midnight 0L) in
           let _num_rows =
             List.fold_left (fun dst_offset chunk ->
                 let chunk = Chunk.create chunk ~fail_on_null:true ~fail_on_offset:false in
                 let data = Chunk.primitive_data_ptr chunk ~ctype:int64_t in
                 for idx = 0 to chunk.length - 1 do
                   let ns = !@(data +@ idx) in
-                  dst.(dst_offset + idx) <- Datetime.Time_ns.Ofday.of_ns_since_midnight ns
+                  dst.(dst_offset + idx) <- Time.Time_ns.Ofday.of_ns_since_midnight ns
                 done;
                 dst_offset + chunk.length) 0 chunks
           in
@@ -1322,7 +1322,7 @@ module Column = struct
                     in
                     if is_valid then (
                       let days = !@(data +@ idx) |> Int32.to_int in
-                      dst.(dst_offset + idx) <- Some (Datetime.Date.of_unix_days days)
+                      dst.(dst_offset + idx) <- Some (Time.Date.of_unix_days days)
                     )
                   done;
                   dst_offset + chunk.length
@@ -1364,7 +1364,7 @@ module Column = struct
                     in
                     if is_valid then (
                       let ns = !@(data +@ idx) in
-                      dst.(dst_offset + idx) <- Some (Datetime.Time_ns.of_int64_ns_since_epoch ns)
+                      dst.(dst_offset + idx) <- Some (Time.Time_ns.of_int64_ns_since_epoch ns)
                     )
                   done;
                   dst_offset + chunk.length
@@ -1406,7 +1406,7 @@ module Column = struct
                     in
                     if is_valid then (
                       let ns = !@(data +@ idx) in
-                      dst.(dst_offset + idx) <- Some (Datetime.Time_ns.Span.of_ns ns)
+                      dst.(dst_offset + idx) <- Some (Time.Time_ns.Span.of_ns ns)
                     )
                   done;
                   dst_offset + chunk.length
@@ -1448,7 +1448,7 @@ module Column = struct
                     in
                     if is_valid then (
                       let ns = !@(data +@ idx) in
-                      dst.(dst_offset + idx) <- Some (Datetime.Time_ns.Ofday.of_ns_since_midnight ns)
+                      dst.(dst_offset + idx) <- Some (Time.Time_ns.Ofday.of_ns_since_midnight ns)
                     )
                   done;
                   dst_offset + chunk.length

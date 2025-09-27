@@ -1,6 +1,6 @@
 (library
  (name parquet_bindings)
- (public_name parquet.bindings)
+ (public_name arrow.parquet.bindings)
  (modules parquet_bindings)
  (libraries ctypes ctypes.stubs))
 
@@ -11,6 +11,6 @@
 
 (library
  (name parquet_stubs)
- (public_name parquet.stubs)
+ (public_name arrow.parquet.stubs)
  (modules)
  (libraries ctypes))

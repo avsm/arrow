@@ -43,13 +43,13 @@ let set_valid t idx = set t idx true
 let is_valid t idx = get t idx
 
 let from_array bool_array =
-  let len = Array.length bool_array in
+  let len = Stdlib.Array.length bool_array in
   let t = create len in
-  Array.iteri (fun i b -> set t i b) bool_array;
+  Stdlib.Array.iteri (fun i b -> set t i b) bool_array;
   t
 
 let to_array t =
-  Array.init t.length (fun i -> get t i)
+  Stdlib.Array.init t.length (fun i -> get t i)
 
 let to_ba t len =
   let ba = create_ba len in

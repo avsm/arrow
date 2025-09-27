@@ -4,10 +4,10 @@ type _ col_type =
   | Int : int col_type
   | Float : float col_type
   | Utf8 : string col_type
-  | Date : Datetime.Date.t col_type
-  | Time_ns : Datetime.Time_ns.t col_type
-  | Span_ns : Datetime.Time_ns.Span.t col_type
-  | Ofday_ns : Datetime.Time_ns.Ofday.t col_type
+  | Date : Time.Date.t col_type
+  | Time_ns : Time.Time_ns.t col_type
+  | Span_ns : Time.Time_ns.Span.t col_type
+  | Ofday_ns : Time.Time_ns.Ofday.t col_type
   | Bool : bool col_type
 
 type packed_col =
@@ -53,7 +53,7 @@ let col_opt (type a) (data : a option array) (col_type : a col_type) ~name =
   | Time_ns -> Wrapper.Writer.time_ns_opt data ~name
   | Span_ns -> Wrapper.Writer.span_ns_opt data ~name
   | Ofday_ns -> Wrapper.Writer.ofday_ns_opt data ~name
-  | Bool -> Wrapper.Writer.bitset_opt (Valid.from_array (Array.map (Option.value ~default:false) data)) ~valid:(Valid.from_array (Array.map Option.is_some data)) ~name
+  | Bool -> Wrapper.Writer.bitset_opt (Valid.from_array (Stdlib.Array.map (Option.value ~default:false) data)) ~valid:(Valid.from_array (Stdlib.Array.map Option.is_some data)) ~name
 
 let named_col packed_col ~name =
   match packed_col with
@@ -85,5 +85,5 @@ let read_opt (type a) table ~column (col_type : a col_type) : a option array =
   | Bool ->
     let bitset, valid = Wrapper.Column.read_bitset_opt table ~column in
     let length = Valid.length bitset in
-    Array.init length (fun i ->
+    Stdlib.Array.init length (fun i ->
       if Valid.get valid i then Some (Valid.get bitset i) else None)

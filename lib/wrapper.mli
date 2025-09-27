@@ -12,7 +12,7 @@ module Schema : sig
   end
 
   type t =
-    { format : Datatype.t
+    { format : Type.t
     ; name : string
     ; metadata : (string * string) list
     ; flags : Flags.t
@@ -101,10 +101,10 @@ module Column : sig
   val read_int32 : Table.t -> column:column -> Int32.t array
   val read_float : Table.t -> column:column -> float array
   val read_utf8 : Table.t -> column:column -> string array
-  val read_date : Table.t -> column:column -> Datetime.Date.t array
-  val read_time_ns : Table.t -> column:column -> Datetime.Time_ns.t array
-  val read_ofday_ns : Table.t -> column:column -> Datetime.Time_ns.Ofday.t array
-  val read_span_ns : Table.t -> column:column -> Datetime.Time_ns.Span.t array
+  val read_date : Table.t -> column:column -> Time.Date.t array
+  val read_time_ns : Table.t -> column:column -> Time.Time_ns.t array
+  val read_ofday_ns : Table.t -> column:column -> Time.Time_ns.Ofday.t array
+  val read_span_ns : Table.t -> column:column -> Time.Time_ns.Span.t array
 
   val read_i32_ba_opt
     :  Table.t
@@ -130,10 +130,10 @@ module Column : sig
   val read_int32_opt : Table.t -> column:column -> Int32.t option array
   val read_float_opt : Table.t -> column:column -> float option array
   val read_utf8_opt : Table.t -> column:column -> string option array
-  val read_date_opt : Table.t -> column:column -> Datetime.Date.t option array
-  val read_time_ns_opt : Table.t -> column:column -> Datetime.Time_ns.t option array
-  val read_ofday_ns_opt : Table.t -> column:column -> Datetime.Time_ns.Ofday.t option array
-  val read_span_ns_opt : Table.t -> column:column -> Datetime.Time_ns.Span.t option array
+  val read_date_opt : Table.t -> column:column -> Time.Date.t option array
+  val read_time_ns_opt : Table.t -> column:column -> Time.Time_ns.t option array
+  val read_ofday_ns_opt : Table.t -> column:column -> Time.Time_ns.Ofday.t option array
+  val read_span_ns_opt : Table.t -> column:column -> Time.Time_ns.Span.t option array
 
   val read_bitset : Table.t -> column:column -> Valid.t
   val read_bitset_opt : Table.t -> column:column -> Valid.t * Valid.t
@@ -223,15 +223,15 @@ module Writer : sig
   val float_opt : float option array -> name:string -> col
   val utf8 : string array -> name:string -> col
   val utf8_opt : string option array -> name:string -> col
-  val date : Datetime.Date.t array -> name:string -> col
-  val date_opt : Datetime.Date.t option array -> name:string -> col
+  val date : Time.Date.t array -> name:string -> col
+  val date_opt : Time.Date.t option array -> name:string -> col
 
-  val time_ns : Datetime.Time_ns.t array -> name:string -> col
-  val time_ns_opt : Datetime.Time_ns.t option array -> name:string -> col
-  val ofday_ns : Datetime.Time_ns.Ofday.t array -> name:string -> col
-  val ofday_ns_opt : Datetime.Time_ns.Ofday.t option array -> name:string -> col
-  val span_ns : Datetime.Time_ns.Span.t array -> name:string -> col
-  val span_ns_opt : Datetime.Time_ns.Span.t option array -> name:string -> col
+  val time_ns : Time.Time_ns.t array -> name:string -> col
+  val time_ns_opt : Time.Time_ns.t option array -> name:string -> col
+  val ofday_ns : Time.Time_ns.Ofday.t array -> name:string -> col
+  val ofday_ns_opt : Time.Time_ns.Ofday.t option array -> name:string -> col
+  val span_ns : Time.Time_ns.Span.t array -> name:string -> col
+  val span_ns_opt : Time.Time_ns.Span.t option array -> name:string -> col
   val bitset : Valid.t -> name:string -> col
   val bitset_opt : Valid.t -> valid:Valid.t -> name:string -> col
 

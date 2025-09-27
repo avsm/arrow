@@ -1,13 +1,18 @@
-module Datatype = Datatype
-module Datetime = Datetime
+module Type = Type
+module Time = Time
 module Valid = Valid
 module Compression = Compression
-module Wrapper = Wrapper
 module Table = Table
-module Parquet_reader = Parquet_reader
+module Column = Column
 module Builder = Builder
+module IO = Io
+
+(* Legacy modules for compatibility during transition *)
+module Wrapper = Wrapper
+module Parquet_reader = Parquet_reader
 module File_reader = File_reader
+
+(* Direct Parquet access *)
 module Parquet = Parquet
-module Parquet_file = Parquet_file
 
 val version : string

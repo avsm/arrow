@@ -97,12 +97,12 @@ let test_datetime_performance () =
   let size = 10_000 in
 
   let (dates, date_time) = time_function (fun () ->
-    Array.init size (fun i -> Datetime.Date.of_unix_days (19000 + i))
+    Array.init size (fun i -> Time.Date.of_unix_days (19000 + i))
   ) in
 
   let (times, time_time) = time_function (fun () ->
     Array.init size (fun i ->
-      Datetime.Time_ns.of_int64_ns_since_epoch (Int64.of_int (i * 1_000_000_000))
+      Time.Time_ns.of_int64_ns_since_epoch (Int64.of_int (i * 1_000_000_000))
     )
   ) in
 
