@@ -43,5 +43,3 @@ type t = Wrapper.Column.t =
   | Double of (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t
   | Double_option of
       (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t * Valid.ba
-
-let fast_read = Wrapper.Column.fast_read

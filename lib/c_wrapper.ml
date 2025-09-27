@@ -897,8 +897,6 @@ module Builder = struct
     )
 end
 
-
-(* Column data extraction - simplified version *)
 module Column = struct
   type column = [`Name of string | `Index of int]
   
@@ -1181,13 +1179,11 @@ module Column = struct
   let read_f64_ba table ~column = read_ba table ~datatype:Float64 ~kind:Bigarray.float64 ~ctype:double ~column
   let read_f32_ba table ~column = read_ba table ~datatype:Float32 ~kind:Bigarray.float32 ~ctype:float ~column
   
-
   let read_i32_ba_opt table ~column = read_ba_opt table ~datatype:Int32 ~kind:Bigarray.int32 ~ctype:int32_t ~column
   let read_i64_ba_opt table ~column = read_ba_opt table ~datatype:Int64 ~kind:Bigarray.int64 ~ctype:int64_t ~column
   let read_f64_ba_opt table ~column = read_ba_opt table ~datatype:Float64 ~kind:Bigarray.float64 ~ctype:double ~column
   let read_f32_ba_opt table ~column = read_ba_opt table ~datatype:Float32 ~kind:Bigarray.float32 ~ctype:float ~column
 
-  (* Fixed null handling functions using validity bitmasks *)
   let read_int_opt table ~column =
     let ba, valid = read_i64_ba_opt table ~column in
     Array.init (Bigarray.Array1.dim ba) (fun i ->
@@ -1528,42 +1524,4 @@ module Column = struct
         in
         bitset, valid)
 
-  let fast_read table column_index =
-    try
-      (* Try to determine column type by attempting reads *)
-      let column = `Index column_index in
-
-      (* First try reading as String *)
-      try
-        let str_array = read_utf8 table ~column in
-        String str_array
-      with _ ->
-        (* Try reading as Int64 *)
-        try
-          let int64_ba = read_i64_ba table ~column in
-          Int64 int64_ba
-        with _ ->
-          (* Try reading as Double *)
-          try
-            let double_ba = read_f64_ba table ~column in
-            Double double_ba
-          with _ ->
-            (* Try reading as optional String *)
-            try
-              let str_opt_array = read_utf8_opt table ~column in
-              String_option str_opt_array
-            with _ ->
-              (* Try reading as optional Int64 *)
-              try
-                let int64_ba, valid = read_i64_ba_opt table ~column in
-                Int64_option (int64_ba, Valid.bigarray valid)
-              with _ ->
-                (* Try reading as optional Double *)
-                try
-                  let double_ba, valid = read_f64_ba_opt table ~column in
-                  Double_option (double_ba, Valid.bigarray valid)
-                with _ ->
-                  Unsupported_type
-    with _ ->
-      Unsupported_type
 end

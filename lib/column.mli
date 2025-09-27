@@ -82,5 +82,3 @@ type t =
   | Double of (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t
   | Double_option of
       (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t * Valid.ba
-
-val fast_read : Table.t -> int -> t

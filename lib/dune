@@ -12,7 +12,7 @@
  (public_name arrow)
  (name arrow)
  (modules arrow builder c_api c_wrapper column compression
-          file_reader io parquet parquet_reader table time type valid wrapper
+          io parquet parquet_reader table time type valid wrapper
           bindings bindings_generated parquet_bindings parquet_bindings_generated)
  (libraries ctypes ctypes.foreign ptime arrow.bindings arrow.parquet.bindings)
  (private_modules c_wrapper bindings_generated parquet_bindings_generated parquet_bindings)

@@ -421,11 +421,10 @@ arrow::Compression::type compression_of_int(int compression) {
   if (compression == 1) compression_ = arrow::Compression::SNAPPY;
   else if (compression == 2) compression_ = arrow::Compression::GZIP;
   else if (compression == 3) compression_ = arrow::Compression::BROTLI;
-  else if (compression == 4) compression_ = arrow::Compression::ZSTD;
-  else if (compression == 5) compression_ = arrow::Compression::LZ4;
-  else if (compression == 6) compression_ = arrow::Compression::LZ4_FRAME;
-  else if (compression == 7) compression_ = arrow::Compression::LZO;
-  else if (compression == 8) compression_ = arrow::Compression::BZ2;
+  else if (compression == 4) compression_ = arrow::Compression::LZ4_FRAME;  // Lz4 in OCaml
+  else if (compression == 5) compression_ = arrow::Compression::LZ4;       // Lz4_raw in OCaml
+  else if (compression == 6) compression_ = arrow::Compression::ZSTD;      // Zstd in OCaml
+  // Note: LZO and BZ2 are not exposed in the OCaml interface
   return compression_;
 }
 

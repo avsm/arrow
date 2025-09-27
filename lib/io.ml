@@ -98,9 +98,9 @@ module Parquet = struct
          | Parquet.Snappy -> Compression.Snappy
          | Parquet.Gzip _ -> Compression.Gzip
          | Parquet.Brotli _ -> Compression.Brotli
-         | Parquet.Lz4 -> Compression.Lz4
+         | Parquet.Lz4 -> failwith "LZ4 compression not supported for Parquet files"
          | Parquet.Zstd _ -> Compression.Zstd
-         | Parquet.Lzo -> Compression.Lz4)  (* Lzo not in Arrow compression *)
+         | Parquet.Lzo -> failwith "LZO compression not supported in Arrow")
       | None -> Compression.Snappy
     in
     Table.write_parquet ?chunk_size ~compression table filename

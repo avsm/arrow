@@ -2,15 +2,15 @@ module Type = Type
 module Time = Time
 module Valid = Valid
 module Compression = Compression
+module Schema = Wrapper.Schema
 module Table = Table
 module Column = Column
 module Builder = Builder
 module IO = Io
 
-(* Legacy modules for compatibility during transition *)
-module Wrapper = Wrapper
-module Parquet_reader = Parquet_reader
-module File_reader = File_reader
+(* Internal modules - use the reorganized modules above instead *)
+(* module Wrapper = Wrapper *)
+(* module Parquet_reader = Parquet_reader *)
 
 (* Direct Parquet access *)
 module Parquet = Parquet

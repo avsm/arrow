@@ -148,8 +148,6 @@ module Column : sig
     | Double of (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t
     | Double_option of
         (float, Bigarray.float64_elt, Bigarray.c_layout) Bigarray.Array1.t * Valid.ba
-
-  val fast_read : Table.t -> int -> t
 end
 
 module Writer : sig
@@ -294,5 +292,3 @@ module Builder : sig
 
   val make_table : (string * t) list -> Table.t
 end
-
-val keep_alive : Obj.t list ref

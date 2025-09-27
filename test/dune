@@ -7,10 +7,6 @@
  (libraries arrow alcotest))
 
 (test
- (name test_fast_read)
- (libraries arrow alcotest))
-
-(test
  (name test_builder)
  (libraries arrow alcotest))
 
@@ -24,4 +20,20 @@
 
 (test
  (name test_parquet)
+ (libraries arrow alcotest))
+
+(test
+ (name test_csv_to_parquet)
+ (libraries arrow alcotest))
+
+(test
+ (name test_json_to_parquet)
+ (libraries arrow alcotest))
+
+(test
+ (name test_io_comprehensive)
+ (libraries arrow alcotest))
+
+(test
+ (name test_io_module)
  (libraries arrow alcotest))
