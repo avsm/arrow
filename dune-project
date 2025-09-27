@@ -28,6 +28,23 @@
   ptime
   (alcotest :with-test))
  (tags
-  ("arrow" "parquet" "data" "analytics")))
+  ("arrow" "data" "analytics")))
+
+(package
+ (name parquet)
+ (synopsis "OCaml bindings to Apache Parquet columnar file format")
+ (description "OCaml bindings to Apache Parquet, providing efficient columnar storage with compression support for analytical workloads.")
+ (depends
+  ocaml
+  dune
+  ctypes
+  ctypes-foreign
+  arrow
+  cmdliner
+  unix
+  dune-configurator
+  (alcotest :with-test))
+ (tags
+  ("parquet" "data" "analytics")))
 
 ; See the complete stanza docs at https://dune.readthedocs.io/en/stable/reference/dune-project/index.html

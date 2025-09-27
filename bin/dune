@@ -1,4 +1,5 @@
 (executable
- (public_name arrow)
- (name main)
- (libraries arrow))
+ (public_name oarrow)
+ (package arrow)
+ (name oarrow)
+ (libraries arrow cmdliner unix))

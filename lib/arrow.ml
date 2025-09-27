@@ -7,5 +7,7 @@ module Table = Table
 module Parquet_reader = Parquet_reader
 module Builder = Builder
 module File_reader = File_reader
+module Parquet = Parquet
+module Parquet_file = Parquet_file
 
 let version = "1.0.0"

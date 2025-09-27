@@ -70,43 +70,43 @@ typedef void TimestampBuilderPtr;
 typedef void DurationBuilderPtr;
 #endif
 
-struct ArrowSchema *arrow_schema(char*);
-struct ArrowSchema *feather_schema(char*);
-struct ArrowSchema *parquet_schema(char*, int64_t *num_rows);
-struct ArrowSchema *alloc_schema(char*, char*);
+struct ArrowSchema *arrow_schema(const char*);
+struct ArrowSchema *feather_schema(const char*);
+struct ArrowSchema *parquet_schema(const char*, int64_t *num_rows);
+struct ArrowSchema *alloc_schema(const char*, const char*);
 void free_schema(struct ArrowSchema*);
 
-TablePtr *parquet_read_table(char *, int *col_idxs, int ncols, int use_threads, int64_t only_first);
-TablePtr *feather_read_table(char *, int *col_idxs, int ncols);
-TablePtr *csv_read_table(char *);
-TablePtr *json_read_table(char *);
+TablePtr *parquet_read_table(const char *, int *col_idxs, int ncols, int use_threads, int64_t only_first);
+TablePtr *feather_read_table(const char *, int *col_idxs, int ncols);
+TablePtr *csv_read_table(const char *);
+TablePtr *json_read_table(const char *);
 TablePtr *table_concatenate(TablePtr **tables, int ntables);
 TablePtr *table_slice(TablePtr*, int64_t, int64_t);
 int64_t table_num_rows(TablePtr*);
 struct ArrowSchema *table_schema(TablePtr*);
 void free_table(TablePtr*);
 
-int timestamp_unit_in_ns(TablePtr*, char*, int);
-int time64_unit_in_ns(TablePtr*, char*, int);
-int duration_unit_in_ns(TablePtr*, char*, int);
+int timestamp_unit_in_ns(TablePtr*, const char*, int);
+int time64_unit_in_ns(TablePtr*, const char*, int);
+int duration_unit_in_ns(TablePtr*, const char*, int);
 
 struct ArrowArray *table_chunked_column(TablePtr *reader, int column_idx, int *nchunks, int dt);
-struct ArrowArray *table_chunked_column_by_name(TablePtr *reader, char *column_name, int *nchunks, int dt);
+struct ArrowArray *table_chunked_column_by_name(TablePtr *reader, const char *column_name, int *nchunks, int dt);
 void free_chunked_column(struct ArrowArray *, int nchunks);
 
 TablePtr *table_add_all_columns(TablePtr*, TablePtr*);
-TablePtr *table_add_column(TablePtr*, char*, ChunkedArrayPtr*);
-ChunkedArrayPtr *table_get_column(TablePtr*, char*);
+TablePtr *table_add_column(TablePtr*, const char*, ChunkedArrayPtr*);
+ChunkedArrayPtr *table_get_column(TablePtr*, const char*);
 void free_chunked_array(ChunkedArrayPtr*);
 
 TablePtr *create_table(struct ArrowArray *array, struct ArrowSchema *schema);
-void arrow_write_file(char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size);
-void parquet_write_file(char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size, int compression);
-void feather_write_file(char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size, int compression);
-void parquet_write_table(char *filename, TablePtr *table, int chunk_size, int compression);
-void feather_write_table(char *filename, TablePtr *table, int chunk_size, int compression);
+void arrow_write_file(const char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size);
+void parquet_write_file(const char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size, int compression);
+void feather_write_file(const char *filename, struct ArrowArray *, struct ArrowSchema *, int chunk_size, int compression);
+void parquet_write_table(const char *filename, TablePtr *table, int chunk_size, int compression);
+void feather_write_table(const char *filename, TablePtr *table, int chunk_size, int compression);
 
-ParquetReader *parquet_reader_open(char *filename, int *col_idxs, int ncols, int use_threads, int mmap, int buffer_size, int batch_size);
+ParquetReader *parquet_reader_open(const char *filename, int *col_idxs, int ncols, int use_threads, int mmap, int buffer_size, int batch_size);
 TablePtr *parquet_reader_next(ParquetReader *pr);
 void parquet_reader_close(ParquetReader *pr);
 void parquet_reader_free(ParquetReader *pr);
@@ -140,7 +140,7 @@ void append_uint64_builder(UInt64BuilderPtr*, uint64_t);
 void append_float_builder(FloatBuilderPtr*, float);
 void append_double_builder(DoubleBuilderPtr*, double);
 void append_boolean_builder(BooleanBuilderPtr*, int);
-void append_string_builder(StringBuilderPtr*, char*);
+void append_string_builder(StringBuilderPtr*, const char*);
 void append_date32_builder(Date32BuilderPtr*, int32_t);
 void append_date64_builder(Date64BuilderPtr*, int64_t);
 void append_time32_builder(Time32BuilderPtr*, int32_t);

@@ -1,0 +1,16 @@
+(library
+ (name parquet_bindings)
+ (public_name parquet.bindings)
+ (modules parquet_bindings)
+ (libraries ctypes ctypes.stubs))
+
+(executable
+ (name gen)
+ (modules gen)
+ (libraries ctypes.stubs parquet_bindings))
+
+(library
+ (name parquet_stubs)
+ (public_name parquet.stubs)
+ (modules)
+ (libraries ctypes))

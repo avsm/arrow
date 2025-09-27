@@ -22,6 +22,7 @@
 #include<caml/mlvalues.h>
 #include<caml/threads.h>
 #include<caml/fail.h>
+#include<caml/memory.h>
 // invalid_argument is defined in the ocaml runtime and would
 // shadow the C++ std::invalid_argument
 #undef invalid_argument
@@ -67,14 +68,14 @@ void status_exn(arrow::Status &st) {
   }
 }
 
-struct ArrowSchema *arrow_schema(char *filename) {
+struct ArrowSchema *arrow_schema(const char *filename) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::ReadableFile::Open(filename, arrow::default_memory_pool());
   std::shared_ptr<arrow::io::RandomAccessFile> infile = ok_exn(file);
   auto reader = arrow::ipc::RecordBatchFileReader::Open(infile);
   std::shared_ptr<arrow::Schema> schema = ok_exn(reader)->schema();
-  struct ArrowSchema *out = (struct ArrowSchema*)malloc(sizeof *out);
+  struct ArrowSchema *out = (struct ArrowSchema*)caml_stat_alloc(sizeof *out);
   auto export_st = arrow::ExportSchema(*schema, out);
   status_exn(export_st);
   return out;
@@ -83,14 +84,14 @@ struct ArrowSchema *arrow_schema(char *filename) {
   return nullptr;
 }
 
-struct ArrowSchema *feather_schema(char *filename) {
+struct ArrowSchema *feather_schema(const char *filename) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::ReadableFile::Open(filename, arrow::default_memory_pool());
   std::shared_ptr<arrow::io::RandomAccessFile> infile = ok_exn(file);
   auto reader = arrow::ipc::feather::Reader::Open(infile);
   std::shared_ptr<arrow::Schema> schema = ok_exn(reader)->schema();
-  struct ArrowSchema *out = (struct ArrowSchema*)malloc(sizeof *out);
+  struct ArrowSchema *out = (struct ArrowSchema*)caml_stat_alloc(sizeof *out);
   auto export_st = arrow::ExportSchema(*schema, out);
   status_exn(export_st);
   return out;
@@ -99,7 +100,7 @@ struct ArrowSchema *feather_schema(char *filename) {
   return nullptr;
 }
 
-struct ArrowSchema *parquet_schema(char *filename, int64_t *num_rows) {
+struct ArrowSchema *parquet_schema(const char *filename, int64_t *num_rows) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   arrow::Status st;
@@ -110,8 +111,8 @@ struct ArrowSchema *parquet_schema(char *filename, int64_t *num_rows) {
   std::shared_ptr<arrow::Schema> schema;
   st = reader->GetSchema(&schema);
   status_exn(st);
-  *num_rows = reader->parquet_reader()->metadata()->num_rows();
-  struct ArrowSchema *out = (struct ArrowSchema*)malloc(sizeof *out);
+  if (num_rows) *num_rows = reader->parquet_reader()->metadata()->num_rows();
+  struct ArrowSchema *out = (struct ArrowSchema*)caml_stat_alloc(sizeof *out);
   auto export_st = arrow::ExportSchema(*schema, out);
   status_exn(export_st);
   return out;
@@ -120,12 +121,8 @@ struct ArrowSchema *parquet_schema(char *filename, int64_t *num_rows) {
   return nullptr;
 }
 
-struct ArrowSchema *alloc_schema(char *format, char *name) {
-  struct ArrowSchema *schema = (struct ArrowSchema*)malloc(sizeof *schema);
-  if (schema == NULL) {
-    caml_failwith("Failed to allocate ArrowSchema");
-    return NULL;
-  }
+struct ArrowSchema *alloc_schema(const char *format, const char *name) {
+  struct ArrowSchema *schema = (struct ArrowSchema*)caml_stat_alloc(sizeof *schema);
 
   // Initialize all fields to safe defaults
   schema->format = format ? strdup(format) : NULL;
@@ -142,13 +139,20 @@ struct ArrowSchema *alloc_schema(char *format, char *name) {
 }
 
 void free_schema(struct ArrowSchema *schema) {
+  if (!schema) return;
   if (schema->release != NULL)
     schema->release(schema);
   schema->release = NULL;
   // Free any allocated strings if release didn't handle them
-  if (schema->format) free((void*)schema->format);
-  if (schema->name) free((void*)schema->name);
-  free(schema);
+  if (schema->format) {
+    free((void*)schema->format);
+    schema->format = NULL;
+  }
+  if (schema->name) {
+    free((void*)schema->name);
+    schema->name = NULL;
+  }
+  caml_stat_free(schema);
 }
 
 void check_column_idx(int column_idx, int n_cols) {
@@ -159,7 +163,7 @@ void check_column_idx(int column_idx, int n_cols) {
   }
 }
 
-int timestamp_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
+int timestamp_unit_in_ns(TablePtr *table, const char *column_name, int column_idx) {
   int n_cols = (*table)->num_columns();
   if (column_idx >= n_cols) check_column_idx(column_idx, n_cols);
 
@@ -193,7 +197,7 @@ int timestamp_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
   return -1;
 }
 
-int time64_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
+int time64_unit_in_ns(TablePtr *table, const char *column_name, int column_idx) {
   int n_cols = (*table)->num_columns();
   if (column_idx >= n_cols) check_column_idx(column_idx, n_cols);
 
@@ -227,7 +231,7 @@ int time64_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
   return -1;
 }
 
-int duration_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
+int duration_unit_in_ns(TablePtr *table, const char *column_name, int column_idx) {
   int n_cols = (*table)->num_columns();
   if (column_idx >= n_cols) check_column_idx(column_idx, n_cols);
 
@@ -261,9 +265,10 @@ int duration_unit_in_ns(TablePtr *table, char *column_name, int column_idx) {
   return -1;
 }
 
-struct ArrowArray *table_chunked_column_(TablePtr *table, char *column_name, int column_idx, int *nchunks, int dt) {
+struct ArrowArray *table_chunked_column_(TablePtr *table, const char *column_name, int column_idx, int *nchunks, int dt) {
   OCAML_BEGIN_PROTECT_EXN
 
+  if (!nchunks) caml_failwith("null nchunks pointer");
   arrow::Type::type expected_type;
   const char *expected_type_str = "";
   if (dt == 0) {
@@ -323,7 +328,7 @@ struct ArrowArray *table_chunked_column_(TablePtr *table, char *column_name, int
     throw std::invalid_argument("error finding column");
   }
   *nchunks = array->num_chunks();
-  struct ArrowArray *out = (struct ArrowArray*)malloc(array->num_chunks() * sizeof *out);
+  struct ArrowArray *out = (struct ArrowArray*)caml_stat_alloc(array->num_chunks() * sizeof *out);
   for (int i = 0; i < array->num_chunks(); ++i) {
     auto chunk = array->chunk(i);
     auto chunk_type = chunk->type()->id();
@@ -354,15 +359,16 @@ struct ArrowArray *table_chunked_column(TablePtr *table, int column_idx, int *nc
   return table_chunked_column_(table, NULL, column_idx, nchunks, dt);
 }
 
-struct ArrowArray *table_chunked_column_by_name(TablePtr *table, char *col_name, int *nchunks, int dt) {
+struct ArrowArray *table_chunked_column_by_name(TablePtr *table, const char *col_name, int *nchunks, int dt) {
   return table_chunked_column_(table, col_name, 0, nchunks, dt);
 }
 
 void free_chunked_column(struct ArrowArray *arrays, int nchunks) {
+  if (!arrays) return;
   for (int i = 0; i < nchunks; ++i) {
     if (arrays[i].release != NULL) arrays[i].release(arrays + i);
   }
-  free(arrays);
+  caml_stat_free(arrays);
 }
 
 TablePtr *table_add_all_columns(TablePtr* t1, TablePtr* t2) {
@@ -382,7 +388,7 @@ TablePtr *table_add_all_columns(TablePtr* t1, TablePtr* t2) {
   return nullptr;
 }
 
-TablePtr *table_add_column(TablePtr* t, char* col_name, ChunkedArrayPtr* array) {
+TablePtr *table_add_column(TablePtr* t, const char* col_name, ChunkedArrayPtr* array) {
   OCAML_BEGIN_PROTECT_EXN
 
   auto field = arrow::field(col_name, (*array)->type());
@@ -393,7 +399,7 @@ TablePtr *table_add_column(TablePtr* t, char* col_name, ChunkedArrayPtr* array) 
   return nullptr;
 }
 
-ChunkedArrayPtr *table_get_column(TablePtr* t, char* col_name) {
+ChunkedArrayPtr *table_get_column(TablePtr* t, const char* col_name) {
   OCAML_BEGIN_PROTECT_EXN
 
   auto array = (*t)->GetColumnByName(std::string(col_name));
@@ -428,13 +434,13 @@ TablePtr *create_table(struct ArrowArray *array, struct ArrowSchema *schema) {
 
   auto record_batch = arrow::ImportRecordBatch(array, schema);
   auto table = arrow::Table::FromRecordBatches({ok_exn(record_batch)});
-  return new std::shared_ptr<arrow::Table>(std::move(ok_exn(table)));
+  return new std::shared_ptr<arrow::Table>(ok_exn(table));
 
   OCAML_END_PROTECT_EXN
   return nullptr;
 }
 
-void parquet_write_file(char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size, int compression) {
+void parquet_write_file(const char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size, int compression) {
   // It is important for this shared pointer to only go out of scope after getting
   // the ocaml lock back as the table release can use ocaml callbacks defined in
   // [schema]/[array].
@@ -444,7 +450,7 @@ void parquet_write_file(char *filename, struct ArrowArray *array, struct ArrowSc
   auto outfile = ok_exn(file);
   auto record_batch = arrow::ImportRecordBatch(array, schema);
   auto table_ = arrow::Table::FromRecordBatches({ok_exn(record_batch)});
-  table = std::move(ok_exn(table_));
+  table = ok_exn(table_);
   {
     caml_lock_guard lock;
     arrow::Compression::type compression_ = compression_of_int(compression);
@@ -459,7 +465,7 @@ void parquet_write_file(char *filename, struct ArrowArray *array, struct ArrowSc
   OCAML_END_PROTECT_EXN
 }
 
-void arrow_write_file(char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size) {
+void arrow_write_file(const char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size) {
   std::shared_ptr<arrow::Table> table;
   OCAML_BEGIN_PROTECT_EXN
 
@@ -467,7 +473,7 @@ void arrow_write_file(char *filename, struct ArrowArray *array, struct ArrowSche
   auto outfile = ok_exn(file);
   auto record_batch = arrow::ImportRecordBatch(array, schema);
   auto table_ = arrow::Table::FromRecordBatches({ok_exn(record_batch)});
-  table = std::move(ok_exn(table_));
+  table = ok_exn(table_);
   auto batch_writer = arrow::ipc::MakeFileWriter(&(*outfile), table->schema());
   {
     caml_lock_guard lock;
@@ -478,7 +484,7 @@ void arrow_write_file(char *filename, struct ArrowArray *array, struct ArrowSche
   OCAML_END_PROTECT_EXN
 }
 
-void feather_write_file(char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size, int compression) {
+void feather_write_file(const char *filename, struct ArrowArray *array, struct ArrowSchema *schema, int chunk_size, int compression) {
   std::shared_ptr<arrow::Table> table;
   OCAML_BEGIN_PROTECT_EXN
 
@@ -486,7 +492,7 @@ void feather_write_file(char *filename, struct ArrowArray *array, struct ArrowSc
   auto outfile = ok_exn(file);
   auto record_batch = arrow::ImportRecordBatch(array, schema);
   auto table_ = arrow::Table::FromRecordBatches({ok_exn(record_batch)});
-  table = std::move(ok_exn(table_));
+  table = ok_exn(table_);
   struct arrow::ipc::feather::WriteProperties wp;
   wp.compression = compression_of_int(compression);
   wp.chunksize = chunk_size;
@@ -499,7 +505,7 @@ void feather_write_file(char *filename, struct ArrowArray *array, struct ArrowSc
   OCAML_END_PROTECT_EXN
 }
 
-void parquet_write_table(char *filename, TablePtr *table, int chunk_size, int compression) {
+void parquet_write_table(const char *filename, TablePtr *table, int chunk_size, int compression) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::FileOutputStream::Open(filename);
@@ -515,7 +521,7 @@ void parquet_write_table(char *filename, TablePtr *table, int chunk_size, int co
   OCAML_END_PROTECT_EXN
 }
 
-void feather_write_table(char *filename, TablePtr *table, int chunk_size, int compression) {
+void feather_write_table(const char *filename, TablePtr *table, int chunk_size, int compression) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::FileOutputStream::Open(filename);
@@ -529,7 +535,7 @@ void feather_write_table(char *filename, TablePtr *table, int chunk_size, int co
   OCAML_END_PROTECT_EXN
 }
 
-ParquetReader *parquet_reader_open(char *filename, int *col_idxs, int ncols, int use_threads, int mmap, int buffer_size, int batch_size) {
+ParquetReader *parquet_reader_open(const char *filename, int *col_idxs, int ncols, int use_threads, int mmap, int buffer_size, int batch_size) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   arrow::Status st;
@@ -576,8 +582,8 @@ TablePtr *parquet_reader_next(ParquetReader *pr) {
     return nullptr;
   }
   auto table_ = arrow::Table::FromRecordBatches({batch});
-  std::shared_ptr<arrow::Table> table = std::move(ok_exn(table_));
-  return new std::shared_ptr<arrow::Table>(std::move(table));
+  std::shared_ptr<arrow::Table> table = ok_exn(table_);
+  return new std::shared_ptr<arrow::Table>(table);
 
   OCAML_END_PROTECT_EXN
   return nullptr;
@@ -592,7 +598,7 @@ void parquet_reader_free(ParquetReader *pr) {
   delete pr;
 }
 
-TablePtr *parquet_read_table(char *filename, int *col_idxs, int ncols, int use_threads, int64_t only_first) {
+TablePtr *parquet_read_table(const char *filename, int *col_idxs, int ncols, int use_threads, int64_t only_first) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   arrow::Status st;
@@ -625,7 +631,7 @@ TablePtr *parquet_read_table(char *filename, int *col_idxs, int ncols, int use_t
         status_exn(st);
         if (batch == nullptr) break;
         if (only_first <= batch->num_rows()) {
-          batches.push_back(std::move(batch->Slice(0, only_first)));
+          batches.push_back(batch->Slice(0, only_first));
           only_first = 0;
           break;
         }
@@ -638,15 +644,15 @@ TablePtr *parquet_read_table(char *filename, int *col_idxs, int ncols, int use_t
         break;
     }
     auto table_ = arrow::Table::FromRecordBatches(batches);
-    table = std::move(ok_exn(table_));
+    table = ok_exn(table_);
   }
-  return new std::shared_ptr<arrow::Table>(std::move(table));
+  return new std::shared_ptr<arrow::Table>(table);
 
   OCAML_END_PROTECT_EXN
   return nullptr;
 }
 
-TablePtr *feather_read_table(char *filename, int *col_idxs, int ncols) {
+TablePtr *feather_read_table(const char *filename, int *col_idxs, int ncols) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   arrow::Status st;
@@ -659,12 +665,12 @@ TablePtr *feather_read_table(char *filename, int *col_idxs, int ncols) {
   else
     st = ok_exn(reader)->Read(&table);
   status_exn(st);
-  return new std::shared_ptr<arrow::Table>(std::move(table));
+  return new std::shared_ptr<arrow::Table>(table);
   OCAML_END_PROTECT_EXN
   return nullptr;
 }
 
-TablePtr *csv_read_table(char *filename) {
+TablePtr *csv_read_table(const char *filename) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::ReadableFile::Open(filename, arrow::default_memory_pool());
@@ -678,13 +684,13 @@ TablePtr *csv_read_table(char *filename) {
                                   arrow::csv::ConvertOptions::Defaults());
 
   auto table = ok_exn(reader)->Read();
-  return new std::shared_ptr<arrow::Table>(std::move(ok_exn(table)));
+  return new std::shared_ptr<arrow::Table>(ok_exn(table));
 
   OCAML_END_PROTECT_EXN
   return nullptr;
 }
 
-TablePtr *json_read_table(char *filename) {
+TablePtr *json_read_table(const char *filename) {
   OCAML_BEGIN_PROTECT_EXN_RELEASE_LOCK
 
   auto file = arrow::io::ReadableFile::Open(filename, arrow::default_memory_pool());
@@ -698,7 +704,7 @@ TablePtr *json_read_table(char *filename) {
   std::shared_ptr<arrow::json::TableReader> reader = ok_exn(reader_);
   auto table_ = reader->Read();
   std::shared_ptr<arrow::Table> table = ok_exn(table_);
-  return new std::shared_ptr<arrow::Table>(std::move(table));
+  return new std::shared_ptr<arrow::Table>(table);
 
   OCAML_END_PROTECT_EXN
   return nullptr;
@@ -707,10 +713,14 @@ TablePtr *json_read_table(char *filename) {
 TablePtr *table_concatenate(TablePtr **tables, int ntables) {
   OCAML_BEGIN_PROTECT_EXN
 
+  if (!tables) caml_failwith("null tables array");
   std::vector<std::shared_ptr<arrow::Table>> vec;
-  for (int i = 0; i < ntables; ++i) vec.push_back(**(tables+i));
+  for (int i = 0; i < ntables; ++i) {
+    if (!tables[i]) caml_failwith("null table pointer");
+    vec.push_back(*tables[i]);
+  }
   auto table = arrow::ConcatenateTables(vec);
-  return new std::shared_ptr<arrow::Table>(std::move(ok_exn(table)));
+  return new std::shared_ptr<arrow::Table>(ok_exn(table));
 
   OCAML_END_PROTECT_EXN
   return nullptr;
@@ -729,8 +739,9 @@ int64_t table_num_rows(TablePtr *table) {
 }
 
 struct ArrowSchema *table_schema(TablePtr *table) {
+  if (!table) caml_failwith("null table pointer");
   std::shared_ptr<arrow::Schema> schema = (*table)->schema();
-  struct ArrowSchema *out = (struct ArrowSchema*)malloc(sizeof *out);
+  struct ArrowSchema *out = (struct ArrowSchema*)caml_stat_alloc(sizeof *out);
   auto export_st = arrow::ExportSchema(*schema, out);
   status_exn(export_st);
   return out;
@@ -885,7 +896,7 @@ void append_double_builder(DoubleBuilderPtr* ptr, double v) {
 }
 
 
-void append_string_builder(StringBuilderPtr* ptr, char* v) {
+void append_string_builder(StringBuilderPtr* ptr, const char* v) {
   OCAML_BEGIN_PROTECT_EXN
 
   arrow::Status st = (*ptr)->Append(v);
@@ -1408,7 +1419,7 @@ TablePtr *make_table(BuilderPtr **builders, char **col_names, int n) {
   }
   auto schema = std::make_shared<arrow::Schema>(schema_vector);
   auto table = arrow::Table::Make(schema, arrays);
-  return new std::shared_ptr<arrow::Table>(std::move(table));
+  return new std::shared_ptr<arrow::Table>(table);
 
   OCAML_END_PROTECT_EXN
   return nullptr;
@@ -1417,7 +1428,10 @@ TablePtr *make_table(BuilderPtr **builders, char **col_names, int n) {
 char *table_to_string(TablePtr *table) {
   OCAML_BEGIN_PROTECT_EXN
 
+  if (!table) caml_failwith("null table pointer");
   std::string str = (*table)->ToString();
+  /* FIXME: strdup can return null on allocation failure - not checked */
+  /* FIXME: Memory leak - returned string is never freed */
   return strdup(str.c_str());
 
   OCAML_END_PROTECT_EXN
@@ -1474,6 +1488,7 @@ value fast_col_read(value tbl, value col_idx) {
       else {
         for (int64_t row_index = 0; row_index < chunk_len; ++row_index) {
           int len = 0;
+          /* FIXME: GetValue might return null - not checked before passing to caml_alloc_initialized_string */
           char *ptr = (char*)str_array->GetValue(row_index, &len);
           Store_field(ocaml_array, res_index++, caml_alloc_initialized_string(len, ptr));
         }
