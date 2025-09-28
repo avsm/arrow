@@ -1,3 +1,5 @@
+module ChunkedArray = Wrapper.ChunkedArray
+
 type t = Wrapper.Table.t
 
 type _ col_type =
@@ -19,7 +21,7 @@ type writer_col = Wrapper.Writer.col
 let concatenate = Wrapper.Table.concatenate
 let slice = Wrapper.Table.slice
 let num_rows = Wrapper.Table.num_rows
-let schema = Wrapper.Table.schema
+let schema t = Wrapper.Table.schema t
 let read_csv = Wrapper.Table.read_csv
 let read_json = Wrapper.Table.read_json
 let write_parquet = Wrapper.Table.write_parquet
@@ -59,6 +61,8 @@ let named_col packed_col name =
   match packed_col with
   | P (typ_, data) -> col data typ_ name
   | O (typ_, data) -> col_opt data typ_ name
+
+type column = Wrapper.Column.column
 
 let read (type a) table ~column (col_type : a col_type) : a array =
   match col_type with

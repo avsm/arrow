@@ -11,41 +11,48 @@ module type Intf = sig
 end
 
 module Double = struct
-  include Wrapper.DoubleBuilder
+  type t = Wrapper.DoubleBuilder.t
+  let create = Wrapper.DoubleBuilder.create
+  let append = Wrapper.DoubleBuilder.append
+  let append_null = Wrapper.DoubleBuilder.append_null
 
   let append_opt t v =
     match v with
     | None -> append_null t ~n:1
     | Some v -> append t v
 
-  let length t = length t |> Int64.to_int
-  let null_count t = null_count t |> Int64.to_int
+  let length t = Wrapper.DoubleBuilder.length t |> Int64.to_int
+  let null_count t = Wrapper.DoubleBuilder.null_count t |> Int64.to_int
 end
 
 module String = struct
-  include Wrapper.StringBuilder
+  type t = Wrapper.StringBuilder.t
+  let create = Wrapper.StringBuilder.create
+  let append = Wrapper.StringBuilder.append
+  let append_null = Wrapper.StringBuilder.append_null
 
   let append_opt t v =
     match v with
     | None -> append_null t ~n:1
     | Some v -> append t v
 
-  let length t = length t |> Int64.to_int
-  let null_count t = null_count t |> Int64.to_int
+  let length t = Wrapper.StringBuilder.length t |> Int64.to_int
+  let null_count t = Wrapper.StringBuilder.null_count t |> Int64.to_int
 end
 
 module NativeInt = struct
-  include Wrapper.Int64Builder
-
-  let append t v = append t (Int64.of_int v)
+  type t = Wrapper.Int64Builder.t
+  let create = Wrapper.Int64Builder.create
+  let append t v = Wrapper.Int64Builder.append t (Int64.of_int v)
+  let append_null = Wrapper.Int64Builder.append_null
 
   let append_opt t v =
     match v with
     | None -> append_null t ~n:1
     | Some v -> append t v
 
-  let length t = length t |> Int64.to_int
-  let null_count t = null_count t |> Int64.to_int
+  let length t = Wrapper.Int64Builder.length t |> Int64.to_int
+  let null_count t = Wrapper.Int64Builder.null_count t |> Int64.to_int
 end
 
 module Int32 = struct

@@ -1,4 +1,13 @@
+(** Arrow Table - A collection of equal-length columns *)
+
+(** Chunked array type for column data *)
+module ChunkedArray : sig
+  type t
+  (** A chunked array represents column data that may be split across multiple chunks *)
+end
+
 type t = Wrapper.Table.t
+(** An Arrow table *)
 
 val concatenate : t list -> t
 val slice : t -> offset:int -> length:int -> t
@@ -9,8 +18,8 @@ val read_json : string -> t
 val write_parquet : ?chunk_size:int -> ?compression:Compression.t -> t -> string -> unit
 val write_feather : ?chunk_size:int -> ?compression:Compression.t -> t -> string -> unit
 val to_string_debug : t -> string
-val add_column : t -> string -> Wrapper.ChunkedArray.t -> t
-val get_column : t -> string -> Wrapper.ChunkedArray.t
+val add_column : t -> string -> ChunkedArray.t -> t
+val get_column : t -> string -> ChunkedArray.t
 val add_all_columns : t -> t -> t
 
 type _ col_type =
@@ -33,5 +42,9 @@ val create : writer_col list -> t
 val named_col : packed_col -> string -> writer_col
 val col : 'a array -> 'a col_type -> string -> writer_col
 val col_opt : 'a option array -> 'a col_type -> string -> writer_col
-val read : t -> column:Wrapper.Column.column -> 'a col_type -> 'a array
-val read_opt : t -> column:Wrapper.Column.column -> 'a col_type -> 'a option array
+
+type column = Wrapper.Column.column
+(** Column selector type *)
+
+val read : t -> column:column -> 'a col_type -> 'a array
+val read_opt : t -> column:column -> 'a col_type -> 'a option array

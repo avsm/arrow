@@ -11,79 +11,98 @@ module type Intf = sig
 end
 
 module Double : sig
-  include Intf with type elem := float and type t = Wrapper.DoubleBuilder.t
+  type t
+  include Intf with type t := t and type elem := float
 end
 
 module Int32 : sig
-  include Intf with type elem := int32 and type t = Wrapper.Int32Builder.t
+  type t
+  include Intf with type t := t and type elem := int32
 end
 
 module Int64 : sig
-  include Intf with type elem := int64 and type t = Wrapper.Int64Builder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 module NativeInt : sig
-  include Intf with type elem := int and type t = Wrapper.Int64Builder.t
+  type t
+  include Intf with type t := t and type elem := int
 end
 
 module String : sig
-  include Intf with type elem := string and type t = Wrapper.StringBuilder.t
+  type t
+  include Intf with type t := t and type elem := string
 end
 
 module Int8 : sig
-  include Intf with type elem := int and type t = C_wrapper.Int8Builder.t
+  type t
+  include Intf with type t := t and type elem := int
 end
 
 module Int16 : sig
-  include Intf with type elem := int and type t = C_wrapper.Int16Builder.t
+  type t
+  include Intf with type t := t and type elem := int
 end
 
 module UInt8 : sig
-  include Intf with type elem := int and type t = C_wrapper.UInt8Builder.t
+  type t
+  include Intf with type t := t and type elem := int
 end
 
 module UInt16 : sig
-  include Intf with type elem := int and type t = C_wrapper.UInt16Builder.t
+  type t
+  include Intf with type t := t and type elem := int
 end
 
 module UInt32 : sig
-  include Intf with type elem := int32 and type t = C_wrapper.UInt32Builder.t
+  type t
+  include Intf with type t := t and type elem := int32
 end
 
 module UInt64 : sig
-  include Intf with type elem := int64 and type t = C_wrapper.UInt64Builder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 module Float : sig
-  include Intf with type elem := float and type t = C_wrapper.FloatBuilder.t
+  type t
+  include Intf with type t := t and type elem := float
 end
 
 module Boolean : sig
-  include Intf with type elem := bool and type t = C_wrapper.BooleanBuilder.t
+  type t
+  include Intf with type t := t and type elem := bool
 end
 
 module Date32 : sig
-  include Intf with type elem := int32 and type t = C_wrapper.Date32Builder.t
+  type t
+  include Intf with type t := t and type elem := int32
 end
 
 module Date64 : sig
-  include Intf with type elem := int64 and type t = C_wrapper.Date64Builder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 module Time32 : sig
-  include Intf with type elem := int32 and type t = C_wrapper.Time32Builder.t
+  type t
+  include Intf with type t := t and type elem := int32
 end
 
 module Time64 : sig
-  include Intf with type elem := int64 and type t = C_wrapper.Time64Builder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 module Timestamp : sig
-  include Intf with type elem := int64 and type t = C_wrapper.TimestampBuilder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 module Duration : sig
-  include Intf with type elem := int64 and type t = C_wrapper.DurationBuilder.t
+  type t
+  include Intf with type t := t and type elem := int64
 end
 
 val make_table : (string * Wrapper.Builder.t) list -> Table.t
