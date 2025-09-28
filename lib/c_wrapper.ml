@@ -1229,7 +1229,7 @@ module Column = struct
         ))
 
   let read_time_ns table ~column =
-    with_column table Time64 ~column ~f:(fun chunks ->
+    with_column table Timestamp ~column ~f:(fun chunks ->
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (
@@ -1328,7 +1328,7 @@ module Column = struct
         ))
 
   let read_time_ns_opt table ~column =
-    with_column table Time64 ~column ~f:(fun chunks ->
+    with_column table Timestamp ~column ~f:(fun chunks ->
         let num_rows = num_rows chunks in
         if num_rows = 0 then [||]
         else (

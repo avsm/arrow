@@ -33,7 +33,7 @@ let create (cols : writer_col list) : t =
   (* Use the actual Writer.create_table function *)
   Wrapper.Writer.create_table ~cols
 
-let col (type a) (data : a array) (col_type : a col_type) ~name =
+let col (type a) (data : a array) (col_type : a col_type) name =
   match col_type with
   | Int -> Wrapper.Writer.int data ~name
   | Float -> Wrapper.Writer.float data ~name
@@ -44,7 +44,7 @@ let col (type a) (data : a array) (col_type : a col_type) ~name =
   | Ofday_ns -> Wrapper.Writer.ofday_ns data ~name
   | Bool -> Wrapper.Writer.bitset (Valid.from_array data) ~name
 
-let col_opt (type a) (data : a option array) (col_type : a col_type) ~name =
+let col_opt (type a) (data : a option array) (col_type : a col_type) name =
   match col_type with
   | Int -> Wrapper.Writer.int_opt data ~name
   | Float -> Wrapper.Writer.float_opt data ~name
@@ -55,10 +55,10 @@ let col_opt (type a) (data : a option array) (col_type : a col_type) ~name =
   | Ofday_ns -> Wrapper.Writer.ofday_ns_opt data ~name
   | Bool -> Wrapper.Writer.bitset_opt (Valid.from_array (Stdlib.Array.map (Option.value ~default:false) data)) ~valid:(Valid.from_array (Stdlib.Array.map Option.is_some data)) ~name
 
-let named_col packed_col ~name =
+let named_col packed_col name =
   match packed_col with
-  | P (typ_, data) -> col data typ_ ~name
-  | O (typ_, data) -> col_opt data typ_ ~name
+  | P (typ_, data) -> col data typ_ name
+  | O (typ_, data) -> col_opt data typ_ name
 
 let read (type a) table ~column (col_type : a col_type) : a array =
   match col_type with

@@ -30,8 +30,8 @@ type packed_col =
 type writer_col
 
 val create : writer_col list -> t
-val named_col : packed_col -> name:string -> writer_col
-val col : 'a array -> 'a col_type -> name:string -> writer_col
-val col_opt : 'a option array -> 'a col_type -> name:string -> writer_col
+val named_col : packed_col -> string -> writer_col
+val col : 'a array -> 'a col_type -> string -> writer_col
+val col_opt : 'a option array -> 'a col_type -> string -> writer_col
 val read : t -> column:Wrapper.Column.column -> 'a col_type -> 'a array
 val read_opt : t -> column:Wrapper.Column.column -> 'a col_type -> 'a option array

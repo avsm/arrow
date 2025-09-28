@@ -37,7 +37,7 @@ let schema filename =
   | Some "csv" -> Table.read_csv filename |> Table.schema
   | Some "json" -> Table.read_json filename |> Table.schema
   | Some "feather" -> Wrapper.Feather_reader.schema filename
-  | Some "parquet" -> Wrapper.Parquet_reader.schema filename
+  | Some "parquet" -> Parquet.read_schema filename
   | Some _ | None -> unknown_suffix filename
 
 let read ?columns filename =
@@ -52,10 +52,10 @@ let read ?columns filename =
     Wrapper.Feather_reader.table ?column_idxs filename
   | Some "parquet" ->
     let column_idxs = match columns with
-      | Some cols -> Some (indexes cols ~filename ~schema_fn:Wrapper.Parquet_reader.schema)
+      | Some cols -> Some (indexes cols ~filename ~schema_fn:Parquet.read_schema)
       | None -> None
     in
-    Wrapper.Parquet_reader.table ?column_idxs filename
+    Parquet.read_table ?column_idxs filename
   | Some _ | None -> unknown_suffix filename
 
 let write ?chunk_size ?compression table filename =
@@ -80,14 +80,14 @@ module Parquet = struct
   type compression = Parquet.compression
   type metadata = Parquet.file_metadata
 
-  let schema = Wrapper.Parquet_reader.schema
+  let schema = Parquet.read_schema
 
   let read ?columns filename =
     let column_idxs = match columns with
-      | Some cols -> Some (indexes cols ~filename ~schema_fn:Wrapper.Parquet_reader.schema)
+      | Some cols -> Some (indexes cols ~filename ~schema_fn:Parquet.read_schema)
       | None -> None
     in
-    Wrapper.Parquet_reader.table ?column_idxs filename
+    Parquet.read_table ?column_idxs filename
 
   let write ?chunk_size ?compression table filename =
     let compression = match compression with
@@ -106,7 +106,7 @@ module Parquet = struct
     Table.write_parquet ?chunk_size ~compression table filename
 
   let read_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f =
-    Parquet_reader.iter_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f
+    Parquet.read_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f
 
   let metadata filename =
     let reader = Parquet.Reader.open_file filename in

@@ -283,9 +283,9 @@ let array_to_table packed_cols rows =
   let cols =
     List.map (fun packed_col ->
       match packed_col with
-      | P { name; get; col_type } -> Table.col (Array.map get rows) col_type ~name
+      | P { name; get; col_type } -> Table.col (Array.map get rows) col_type name
       | O { name; get; col_type } ->
-        Table.col_opt (Array.map get rows) col_type ~name
+        Table.col_opt (Array.map get rows) col_type name
     ) packed_cols
   in
   Table.create cols

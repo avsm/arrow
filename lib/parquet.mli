@@ -173,6 +173,33 @@ module Reader : sig
   (** Close the reader and free resources *)
 end
 
+(** {2 High-level Table Reading} *)
+
+val read_table
+  :  ?only_first:int
+  -> ?use_threads:bool
+  -> ?column_idxs:int list
+  -> string
+  -> Table.t
+(** Read a Parquet file into an Arrow table.
+    @param only_first Read only the first n rows
+    @param use_threads Use multiple threads for reading
+    @param column_idxs Column indices to read (None means all columns) *)
+
+val read_schema : string -> Wrapper.Schema.t
+(** Get the Arrow schema from a Parquet file *)
+
+val read_batches
+  :  ?use_threads:bool
+  -> ?column_idxs:int list
+  -> ?mmap:bool
+  -> ?buffer_size:int
+  -> ?batch_size:int
+  -> string
+  -> f:(Table.t -> unit)
+  -> unit
+(** Read a Parquet file in batches, calling the given function for each batch *)
+
 (** {1 Writing} *)
 
 module Writer : sig

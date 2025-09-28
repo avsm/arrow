@@ -196,7 +196,7 @@ let read_cmd =
       in
 
       (* Read table with limit *)
-      let table = Arrow.Parquet_reader.table file ~only_first:row_limit in
+      let table = Arrow.Parquet.read_table file ~only_first:row_limit in
       let num_rows = Arrow.Table.num_rows table in
 
       if verbose then
@@ -233,7 +233,7 @@ let read_cmd =
           begin try
             match selected_columns with
             | Some [col] ->
-                let data = Arrow.Wrapper.Column.read_utf8 table ~column:(`Name col) in
+                let data = Arrow.Column.read_utf8 table ~column:(`Name col) in
                 Printf.printf "  \"%s_sample\": [\n" col;
                 let sample_size = min 5 (Array.length data) in
                 for i = 0 to sample_size - 1 do
@@ -300,24 +300,24 @@ let convert_cmd =
 
       (* Parse compression *)
       let compression_type = match String.lowercase_ascii compression with
-        | "none" | "uncompressed" -> Arrow.Compression.None
-        | "snappy" -> Arrow.Compression.Snappy
-        | "gzip" -> Arrow.Compression.Gzip
-        | "brotli" -> Arrow.Compression.Brotli
-        | "lz4" -> Arrow.Compression.Lz4
-        | "zstd" -> Arrow.Compression.Zstd
-        | _ -> Arrow.Compression.Snappy
+        | "none" | "uncompressed" -> Arrow.Parquet.Uncompressed
+        | "snappy" -> Arrow.Parquet.Snappy
+        | "gzip" -> Arrow.Parquet.Gzip None
+        | "brotli" -> Arrow.Parquet.Brotli None
+        | "lz4" -> Arrow.Parquet.Lz4
+        | "zstd" -> Arrow.Parquet.Zstd 3
+        | _ -> Arrow.Parquet.Snappy
       in
 
       (* Read input file *)
-      let table = Arrow.Parquet_reader.table input in
+      let table = Arrow.Parquet.read_table input in
       let num_rows = Arrow.Table.num_rows table in
 
       if verbose then
         Printf.printf "Read %d rows from input file\n" num_rows;
 
       (* Write with new compression *)
-      Arrow.Wrapper.Table.write_parquet table output ~compression:compression_type;
+      Arrow.IO.Parquet.write table output ~compression:compression_type;
 
       Printf.printf "✓ Successfully converted file\n";
       Printf.printf "  Input: %s\n" input;

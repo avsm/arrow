@@ -1,0 +1,27 @@
+(test
+ (name test_table)
+ (libraries arrow alcotest))
+
+(test
+ (name test_builder)
+ (libraries arrow alcotest))
+
+(test
+ (name test_column)
+ (libraries arrow alcotest))
+
+(test
+ (name test_io)
+ (libraries arrow alcotest unix))
+
+(test
+ (name test_parquet)
+ (libraries arrow alcotest unix))
+
+(test
+ (name test_valid)
+ (libraries arrow alcotest))
+
+(executable
+ (name test_all)
+ (libraries arrow alcotest))

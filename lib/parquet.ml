@@ -565,3 +565,13 @@ let print_schema filename =
   let schema = Reader.schema reader in
   Format.printf "%a@." pp_schema_node schema;
   Reader.close reader
+
+(* High-level table reading functions *)
+let read_table ?only_first ?use_threads ?column_idxs filename =
+  Parquet_reader.table ?only_first ?use_threads ?column_idxs filename
+
+let read_schema filename =
+  Parquet_reader.schema filename
+
+let read_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f =
+  Parquet_reader.iter_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f
