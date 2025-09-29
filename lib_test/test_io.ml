@@ -114,13 +114,13 @@ let test_unified_write_parquet () =
   Fixtures.cleanup_test_files "unified_write_parquet_.*\\.parquet"
 
 let test_unified_write_with_compression () =
-  let table = Fixtures.pattern_table 4 80 in
+  let table = Fixtures.pattern_table 10 200 in
 
   let test_unified_compression compression extension =
     let filename = Fixtures.temp_file_path ~extension ("unified_comp_" ^ extension) in
     IO.write ~compression table filename;
     let read_table = IO.read filename in
-    Alcotest.(check int) (Printf.sprintf "Unified compression %s" extension) 80 (Table.num_rows read_table);
+    Alcotest.(check int) (Printf.sprintf "Unified compression %s" extension) 200 (Table.num_rows read_table);
     let file_size = (Unix.stat filename).st_size in
     Sys.remove filename;
     file_size

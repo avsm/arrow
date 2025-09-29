@@ -79,13 +79,13 @@ let test_parquet_metadata_access () =
 (** {1 Compression Tests} *)
 
 let test_parquet_compression_algorithms () =
-  let table = Fixtures.pattern_table 5 50 in
+  let table = Fixtures.pattern_table 10 200 in
 
   let test_compression_algorithm name compression =
     let filename = Fixtures.temp_file_path ~extension:".parquet" ("compression_" ^ name) in
     IO.Parquet.write ~compression table filename;
     let read_table = IO.Parquet.read filename in
-    Alcotest.(check int) (Printf.sprintf "%s compression preserves data" name) 50 (Table.num_rows read_table);
+    Alcotest.(check int) (Printf.sprintf "%s compression preserves data" name) 200 (Table.num_rows read_table);
     let file_size = (Unix.stat filename).st_size in
     Sys.remove filename;
     file_size
