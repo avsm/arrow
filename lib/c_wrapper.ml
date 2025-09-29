@@ -881,6 +881,20 @@ module Builder = struct
     | Int32 of Int32Builder.t
     | Int64 of Int64Builder.t
     | String of StringBuilder.t
+    | Float of FloatBuilder.t
+    | Boolean of BooleanBuilder.t
+    | Int8 of Int8Builder.t
+    | Int16 of Int16Builder.t
+    | UInt8 of UInt8Builder.t
+    | UInt16 of UInt16Builder.t
+    | UInt32 of UInt32Builder.t
+    | UInt64 of UInt64Builder.t
+    | Date32 of Date32Builder.t
+    | Date64 of Date64Builder.t
+    | Time32 of Time32Builder.t
+    | Time64 of Time64Builder.t
+    | Timestamp of TimestampBuilder.t
+    | Duration of DurationBuilder.t
 
   let make_table named_builders =
     let n = List.length named_builders in
@@ -896,6 +910,20 @@ module Builder = struct
           | Int32 b -> to_voidp b
           | Int64 b -> to_voidp b
           | String b -> to_voidp b
+          | Float b -> to_voidp b
+          | Boolean b -> to_voidp b
+          | Int8 b -> to_voidp b
+          | Int16 b -> to_voidp b
+          | UInt8 b -> to_voidp b
+          | UInt16 b -> to_voidp b
+          | UInt32 b -> to_voidp b
+          | UInt64 b -> to_voidp b
+          | Date32 b -> to_voidp b
+          | Date64 b -> to_voidp b
+          | Time32 b -> to_voidp b
+          | Time64 b -> to_voidp b
+          | Timestamp b -> to_voidp b
+          | Duration b -> to_voidp b
         in
         builders.(i) <- builder_ptr;
         let name_ptr = ptr_of_string name in
