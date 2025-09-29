@@ -28,8 +28,6 @@ type complex_record = {
 (** {2 Column to Row Conversion Tests} *)
 
 let test_column_builders_to_table () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Create data using column builders *)
   let int_builder = Builder.Column.Int32.create () in
   let string_builder = Builder.Column.String.create () in
@@ -69,11 +67,8 @@ let test_column_builders_to_table () =
   Alcotest.(check (array string)) "Column table names" names table_names;
   Alcotest.(check (array (float 1e-6))) "Column table scores" scores table_scores;
   Alcotest.(check (array bool)) "Column table actives" actives table_actives
-  *)
 
 let test_row_to_column_comparison () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Create same data using both approaches *)
   let records = [|
     { id = 100; name = "Test1"; score = Some 85.5; active = true; tags = "tag1,tag2" };
@@ -133,13 +128,10 @@ let test_row_to_column_comparison () =
   Alcotest.(check (array int)) "IDs match" row_ids col_ids;
   Alcotest.(check (array string)) "Names match" row_names col_names;
   Alcotest.(check (array (option (float 1e-6)))) "Scores match" row_scores col_scores
-  *)
 
 (** {2 Mixed Builder Pattern Tests} *)
 
 let test_mixed_builder_patterns () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Build some columns using column builders, others using row approach *)
   let base_data = [|
     ("A", 1.0, true);
@@ -195,13 +187,10 @@ let test_mixed_builder_patterns () =
   Alcotest.(check (array (float 1e-6))) "Mixed values" [|1.0; 2.5; 3.8; 4.2|] final_values;
   Alcotest.(check (array string)) "Mixed labels" [|"A"; "B"; "C"; "D"|] final_labels;
   Alcotest.(check (array bool)) "Mixed flags" [|true; false; true; false|] final_flags
-  *)
 
 (** {2 Performance and Scale Tests} *)
 
 let test_large_dataset_comparison () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Compare performance/correctness of both approaches with larger dataset *)
   let size = 1000 in
   let large_records = Array.init size (fun i ->
@@ -255,13 +244,10 @@ let test_large_dataset_comparison () =
 
   Alcotest.(check (array int)) "Large dataset ID sample match" row_sample_ids col_sample_ids;
   Alcotest.(check (array string)) "Large dataset name sample match" row_sample_names col_sample_names
-  *)
 
 (** {2 Error Handling and Edge Cases} *)
 
 let test_empty_builders_integration () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Test combining empty column builders with empty row builders *)
   let empty_records = [||] in
   let empty_row_table = Builder.Row.array_to_table
@@ -286,11 +272,8 @@ let test_empty_builders_integration () =
   Alcotest.(check (array int)) "Empty row data" [||] row_data;
   Alcotest.(check (array int)) "Empty col IDs" [||] col_ids;
   Alcotest.(check (array string)) "Empty col texts" [||] col_texts
-  *)
 
 let test_all_nulls_integration () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Create tables with all null values using both approaches *)
   let nullable_records = Array.init 5 (fun i ->
     { id = i; name = ""; score = None; active = false; tags = "" }
@@ -324,7 +307,6 @@ let test_all_nulls_integration () =
   let expected_all_nulls = Array.make 5 None in
   Alcotest.(check (array (option (float 1e-6)))) "Row all nulls" expected_all_nulls row_scores;
   Alcotest.(check (array (option (float 1e-6)))) "Col all nulls" expected_all_nulls col_scores
-  *)
 
 (** {2 Complex Schema Tests} *)
 
@@ -373,8 +355,6 @@ let test_complex_schema_consistency () =
 (** {2 Interoperability Tests} *)
 
 let test_table_roundtrip () =
-  Alcotest.skip "Builder.make_table not supported - design issue with ChunkedArray combination";
-  (*
   (* Create table using row builder, read data, recreate using column builders *)
   let original_data = sample_test_records 7 in
   let original_table = test_records_to_table original_data in
@@ -418,7 +398,6 @@ let test_table_roundtrip () =
   Alcotest.(check (array string)) "Roundtrip names" names recreated_names;
   Alcotest.(check (array (float 1e-6))) "Roundtrip values" values recreated_values;
   Alcotest.(check (array (option (float 1e-6)))) "Roundtrip scores" scores recreated_scores
-  *)
 
 (** {2 Test Suite} *)
 
