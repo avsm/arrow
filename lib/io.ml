@@ -150,7 +150,7 @@ let write ?chunk_size ?compression table filename =
       | Some Compression.Gzip -> Some (Gzip (Some 6) : Parquet.compression)
       | Some Compression.Brotli -> Some (Brotli (Some 6) : Parquet.compression)
       | Some Compression.Zstd -> Some (Zstd 3 : Parquet.compression)
-      | Some _ -> failwith "Unsupported compression type for Parquet"
+      | Some (Compression.Lz4 | Compression.Lz4_raw) -> failwith "LZ4 compression not supported for Parquet files"
       | None -> None
     in
     Parquet.write ?chunk_size ?compression:parquet_compression table filename

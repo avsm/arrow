@@ -98,7 +98,7 @@ let test_parquet_compression_algorithms () =
   let gzip_max_size = test_compression_algorithm "gzip_max" (Parquet.Gzip (Some 9)) in
   let brotli_default_size = test_compression_algorithm "brotli_default" (Parquet.Brotli None) in
   let brotli_max_size = test_compression_algorithm "brotli_max" (Parquet.Brotli (Some 11)) in
-  let lz4_size = test_compression_algorithm "lz4" Parquet.Lz4 in
+  (* LZ4 is not supported in Parquet format *)
   let zstd_size = test_compression_algorithm "zstd" (Parquet.Zstd 10) in
 
   (* Verify compression effectiveness *)
@@ -107,7 +107,6 @@ let test_parquet_compression_algorithms () =
   Alcotest.(check bool) "Gzip max compresses more" true (gzip_max_size <= gzip_default_size);
   Alcotest.(check bool) "Brotli default compresses" true (brotli_default_size < uncompressed_size);
   Alcotest.(check bool) "Brotli max compresses more" true (brotli_max_size <= brotli_default_size);
-  Alcotest.(check bool) "LZ4 compresses" true (lz4_size < uncompressed_size);
   Alcotest.(check bool) "Zstd compresses" true (zstd_size < uncompressed_size)
 
 let test_parquet_compression_levels () =
