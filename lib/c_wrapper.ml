@@ -571,7 +571,21 @@ module Writer = struct
     (* Create a proper table with struct schema containing columns as children *)
     let n_cols = List.length cols in
     if n_cols = 0 then
-      C.csv_read_table "" |> Table.with_free
+      (* Create an empty table with no columns *)
+      let empty_children_schemas = CArray.of_list (ptr C.ArrowSchema.t) [] in
+      let empty_children_arrays = CArray.of_list (ptr C.ArrowArray.t) [] in
+      let empty_schema = schema_struct
+        ~format:"+s"
+        ~name:""
+        ~children:empty_children_schemas
+        ~flag:Schema.Flags.none in
+      let empty_array = array_struct
+        ~buffers:(CArray.of_list (ptr void) [null])
+        ~children:empty_children_arrays
+        ~null_count:0
+        ~length:0
+        ~finalise:(fun _ -> ()) in
+      C.Table.create (addr empty_array) (addr empty_schema) |> Table.with_free
     else (
       (* Create arrays and schemas for all columns *)
       let (arrays, schemas) = List.split cols in

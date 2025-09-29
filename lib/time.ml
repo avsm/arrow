@@ -47,10 +47,15 @@ module Time_ns = struct
   
   module Span = struct
     type t = Ptime.span
-    
+
     let of_ns ns =
-      match Ptime.Span.of_d_ps (0, Int64.mul ns 1000L) with
-      | None -> failwith "Invalid span from nanoseconds"
+      (* Convert nanoseconds to days and picoseconds *)
+      let ns_per_day = Int64.mul 86400L 1_000_000_000L in
+      let days = Int64.to_int (Int64.div ns ns_per_day) in
+      let remaining_ns = Int64.rem ns ns_per_day in
+      let ps = Int64.mul remaining_ns 1000L in
+      match Ptime.Span.of_d_ps (days, ps) with
+      | None -> failwith (Printf.sprintf "Invalid span from nanoseconds: %Ld" ns)
       | Some span -> span
     
     let to_ns span =

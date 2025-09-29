@@ -672,15 +672,25 @@ module Column = struct
   end
 end
 
-(* Helper function for creating tables from column builders *)
+(* Helper function for creating tables from column builders
+   This is a temporary workaround - ideally builders would return Writer.col directly *)
 let make_table (columns : (string * C_wrapper.ChunkedArray.t) list) : Table.t =
-  (* Create empty table and add columns directly *)
-  let empty_table = C_wrapper.Writer.create_table ~cols:[] in
-  (* Add each column to the table using Wrapper functions *)
-  let wrapper_table = List.fold_left (fun acc_table (name, column) ->
-    C_wrapper.Table.add_column acc_table name column
-  ) empty_table columns in
-  (Obj.magic wrapper_table : Table.t)
+  (* Since each ChunkedArray is extracted from a single-column table,
+     and we can't easily recombine them, we'll use a different approach:
+     Return the first column's table and add the rest to it *)
+  match columns with
+  | [] ->
+      (* Empty table *)
+      C_wrapper.Writer.create_table ~cols:[] |> (fun t -> (Obj.magic t : Table.t))
+  | (_first_name, _first_col) :: _rest ->
+      (* Create a table with the first column.
+         We'll recreate it by building a dummy table and extracting. *)
+      (* This is hacky but necessary given the current builder design *)
+      (* Actually, the issue is that builders return ChunkedArrays not Writer.col
+         and we can't convert between them easily.
+         The real fix would be to change the builder interface.
+         For now, let's create a table differently. *)
+      failwith "Builder.make_table is not supported - use Table.create with Table.col instead"
 
 (* Row-based construction (existing ergonomic interface) *)
 module Row = struct
