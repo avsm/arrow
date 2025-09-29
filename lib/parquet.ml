@@ -568,10 +568,17 @@ let print_schema filename =
 
 (* High-level table reading functions *)
 let read_table ?only_first ?use_threads ?column_idxs filename =
-  Parquet_reader.table ?only_first ?use_threads ?column_idxs filename
+  (* Convert from C_wrapper.Table.t to Table.t (they're the same type but abstract) *)
+  let wrapper_table = Parquet_reader.table ?only_first ?use_threads ?column_idxs filename in
+  (Obj.magic wrapper_table : Table.t)
 
 let read_schema filename =
-  Parquet_reader.schema filename
+  (* Convert from C_wrapper.Schema.t to Schema.t *)
+  let wrapper_schema = Parquet_reader.schema filename in
+  let c_wrapper_schema = (Obj.magic wrapper_schema : C_wrapper.Schema.t) in
+  Schema.of_c_wrapper c_wrapper_schema
 
 let read_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f =
-  Parquet_reader.iter_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f
+  (* Convert C_wrapper.Table.t to Table.t for the callback *)
+  let wrapped_f table = f (Obj.magic table : Table.t) in
+  Parquet_reader.iter_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f:wrapped_f

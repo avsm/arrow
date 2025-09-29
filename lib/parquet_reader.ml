@@ -1,9 +1,9 @@
-module P = Wrapper.Parquet_reader
+module P = C_wrapper.Parquet_reader
 
 type t = P.t
 
 let create = P.create
-let next = P.next
+let next t = P.next t |> Option.map (fun x -> (Obj.magic x : Table.t))
 let close = P.close
 
 let iter_batches ?use_threads ?column_idxs ?mmap ?buffer_size ?batch_size filename ~f =
@@ -41,6 +41,9 @@ let fold_batches
       in
       loop_read init)
 
-let schema = P.schema
-let schema_and_num_rows = P.schema_and_num_rows
-let table = P.table
+let schema filename = P.schema filename |> Schema.of_c_wrapper
+let schema_and_num_rows filename =
+  let schema, rows = P.schema_and_num_rows filename in
+  Schema.of_c_wrapper schema, rows
+let table ?only_first ?use_threads ?column_idxs filename =
+  P.table ?only_first ?use_threads ?column_idxs filename |> (fun x -> (Obj.magic x : Table.t))

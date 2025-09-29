@@ -106,7 +106,7 @@ module Table = Table
 module Column = Column
 
 (** Schema information for tables and columns *)
-module Schema = Wrapper.Schema
+module Schema = Schema
 
 (** {2 Data Construction} *)
 
@@ -145,6 +145,6 @@ val version : string
     These modules are exposed for advanced use cases but most users should
     use the higher-level modules above:
 
-    - Wrapper: Low-level FFI bindings (not exposed)
+    - C_wrapper: Low-level FFI bindings (internal use only)
     - Parquet_reader: Internal Parquet reading (use Parquet module instead)
 *)

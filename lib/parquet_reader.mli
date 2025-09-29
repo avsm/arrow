@@ -9,7 +9,7 @@ val create
   -> string
   -> t
 
-val next : t -> Wrapper.Table.t option
+val next : t -> Table.t option
 val close : t -> unit
 
 val iter_batches
@@ -19,7 +19,7 @@ val iter_batches
   -> ?buffer_size:int
   -> ?batch_size:int
   -> string
-  -> f:(Wrapper.Table.t -> unit)
+  -> f:(Table.t -> unit)
   -> unit
 
 val fold_batches
@@ -30,15 +30,15 @@ val fold_batches
   -> ?batch_size:int
   -> string
   -> init:'a
-  -> f:('a -> Wrapper.Table.t -> 'a)
+  -> f:('a -> Table.t -> 'a)
   -> 'a
 
-val schema : string -> Wrapper.Schema.t
-val schema_and_num_rows : string -> Wrapper.Schema.t * int
+val schema : string -> Schema.t
+val schema_and_num_rows : string -> Schema.t * int
 
 val table
   :  ?only_first:int
   -> ?use_threads:bool
   -> ?column_idxs:int list
   -> string
-  -> Wrapper.Table.t
+  -> Table.t

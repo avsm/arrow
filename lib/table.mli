@@ -1,25 +1,16 @@
 (** Arrow Table - A collection of equal-length columns *)
 
-(** Chunked array type for column data *)
-module ChunkedArray : sig
-  type t
-  (** A chunked array represents column data that may be split across multiple chunks *)
-end
-
-type t = Wrapper.Table.t
-(** An Arrow table *)
+(** Abstract table type *)
+type t = private C_wrapper.Table.t
+(** An Arrow table that abstracts over the underlying C implementation *)
 
 val concatenate : t list -> t
 val slice : t -> offset:int -> length:int -> t
 val num_rows : t -> int
-val schema : t -> Wrapper.Schema.t
-val read_csv : string -> t
-val read_json : string -> t
-val write_parquet : ?chunk_size:int -> ?compression:Compression.t -> t -> string -> unit
-val write_feather : ?chunk_size:int -> ?compression:Compression.t -> t -> string -> unit
+val schema : t -> Schema.t
 val to_string_debug : t -> string
-val add_column : t -> string -> ChunkedArray.t -> t
-val get_column : t -> string -> ChunkedArray.t
+val add_column : t -> string -> C_wrapper.ChunkedArray.t -> t
+val get_column : t -> string -> C_wrapper.ChunkedArray.t
 val add_all_columns : t -> t -> t
 
 type _ col_type =
@@ -43,7 +34,7 @@ val named_col : packed_col -> string -> writer_col
 val col : 'a array -> 'a col_type -> string -> writer_col
 val col_opt : 'a option array -> 'a col_type -> string -> writer_col
 
-type column = Wrapper.Column.column
+type column = [`Index of int | `Name of string]
 (** Column selector type *)
 
 val read : t -> column:column -> 'a col_type -> 'a array

@@ -7,7 +7,7 @@ val read : ?columns:[ `Indexes of int list | `Names of string list ] -> string -
 val write : ?chunk_size:int -> ?compression:Compression.t -> Table.t -> string -> unit
 
 (** Get schema from a file, auto-detecting format from extension *)
-val schema : string -> Wrapper.Schema.t
+val schema : string -> Schema.t
 
 (** {1 Format-specific submodules} *)
 
@@ -25,7 +25,7 @@ module Parquet : sig
   (** Simple read/write operations *)
   val read : ?columns:[ `Indexes of int list | `Names of string list ] -> string -> Table.t
   val write : ?chunk_size:int -> ?compression:Parquet.compression -> Table.t -> string -> unit
-  val schema : string -> Wrapper.Schema.t
+  val schema : string -> Schema.t
 
   (** Batch reading for large files *)
   val read_batches
@@ -51,5 +51,5 @@ end
 module Feather : sig
   val read : ?columns:[ `Indexes of int list | `Names of string list ] -> string -> Table.t
   val write : ?chunk_size:int -> ?compression:Compression.t -> Table.t -> string -> unit
-  val schema : string -> Wrapper.Schema.t
+  val schema : string -> Schema.t
 end

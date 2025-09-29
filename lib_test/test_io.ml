@@ -68,9 +68,9 @@ let test_io_schema_reading () =
   IO.write table filename;
   let schema = IO.schema filename in
 
-  Alcotest.(check int) "Schema has correct field count" 5 (List.length schema.Schema.children);
+  Alcotest.(check int) "Schema has correct field count" 5 (List.length (Schema.children schema));
 
-  let field_names = List.map (fun field -> field.Schema.name) schema.Schema.children in
+  let field_names = List.map (fun field -> Schema.name field) (Schema.children schema) in
   Alcotest.(check (list string)) "Schema field names correct"
     ["id"; "name"; "score"; "active"; "optional_value"] field_names;
 
@@ -87,7 +87,7 @@ let test_io_parquet_specific () =
   Alcotest.(check int) "Parquet specific read works" 20 (Table.num_rows table2);
 
   let schema = IO.Parquet.schema filename in
-  Alcotest.(check int) "Parquet schema correct" 5 (List.length schema.Schema.children);
+  Alcotest.(check int) "Parquet schema correct" 5 (List.length (Schema.children schema));
 
   let metadata = IO.Parquet.metadata filename in
   Alcotest.(check int64) "Parquet metadata row count" 20L metadata.Parquet.num_rows;
@@ -124,12 +124,12 @@ let test_io_column_selection () =
   (* Test reading with column name selection *)
   let table_names = IO.read ~columns:(`Names ["id"; "name"]) filename in
   let schema_names = Table.schema table_names in
-  Alcotest.(check int) "Column name selection works" 2 (List.length schema_names.Schema.children);
+  Alcotest.(check int) "Column name selection works" 2 (List.length (Schema.children schema_names));
 
   (* Test reading with column index selection *)
   let table_indexes = IO.read ~columns:(`Indexes [0; 2]) filename in
   let schema_indexes = Table.schema table_indexes in
-  Alcotest.(check int) "Column index selection works" 2 (List.length schema_indexes.Schema.children);
+  Alcotest.(check int) "Column index selection works" 2 (List.length (Schema.children schema_indexes));
 
   Sys.remove filename
 
@@ -185,7 +185,7 @@ let test_io_feather_operations () =
     let table2 = IO.Feather.read feather_file in
     Alcotest.(check int) "Feather roundtrip works" 10 (Table.num_rows table2);
     let schema = IO.Feather.schema feather_file in
-    Alcotest.(check int) "Feather schema correct" 5 (List.length schema.Schema.children);
+    Alcotest.(check int) "Feather schema correct" 5 (List.length (Schema.children schema));
     Sys.remove feather_file
   with _ ->
     (* Feather might not be supported, skip test *)

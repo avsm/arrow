@@ -158,9 +158,9 @@ let test_table_schema () =
   ] in
 
   let schema = Table.schema table in
-  let field_names = List.map (fun field -> field.Schema.name) schema.Schema.children in
+  let field_names = List.map (fun field -> Schema.name field) (Schema.children schema) in
 
-  Alcotest.(check int) "Schema field count" 3 (List.length schema.Schema.children);
+  Alcotest.(check int) "Schema field count" 3 (List.length (Schema.children schema));
   Alcotest.(check (list string)) "Schema field names" ["id"; "name"; "value"] field_names
 
 let test_table_empty () =

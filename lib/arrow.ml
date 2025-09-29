@@ -1,7 +1,7 @@
 (* Core Data Structures *)
 module Table = Table
 module Column = Column
-module Schema = Wrapper.Schema
+module Schema = Schema
 
 (* Data Construction *)
 module Builder = Builder

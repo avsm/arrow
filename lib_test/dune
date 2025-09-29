@@ -22,6 +22,18 @@
  (name test_valid)
  (libraries arrow alcotest))
 
+(test
+ (name test_schema)
+ (libraries arrow alcotest))
+
+(test
+ (name test_unified_builder)
+ (libraries arrow alcotest))
+
+(test
+ (name test_unified_io)
+ (libraries arrow alcotest unix))
+
 (executable
  (name test_all)
  (libraries arrow alcotest))

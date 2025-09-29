@@ -186,7 +186,7 @@ val read_table
     @param use_threads Use multiple threads for reading
     @param column_idxs Column indices to read (None means all columns) *)
 
-val read_schema : string -> Wrapper.Schema.t
+val read_schema : string -> Schema.t
 (** Get the Arrow schema from a Parquet file *)
 
 val read_batches

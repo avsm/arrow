@@ -261,7 +261,7 @@ let test_write_read_roundtrip () =
   let filename = Filename.temp_file "test_parquet_" ".parquet" in
 
   (* Write table *)
-  Arrow.Table.write_parquet table filename ~compression:Arrow.Compression.Snappy;
+  Arrow.IO.Parquet.write ~compression:Arrow.Parquet.Snappy table filename;
 
   (* Read back using Parquet reader *)
   let reader = Reader.open_file filename in
@@ -293,7 +293,7 @@ let test_compression_roundtrips () =
 
   let test_compression_type name compression =
     let filename = Filename.temp_file "test_comp_" ".parquet" in
-    Arrow.Table.write_parquet table filename ~compression;
+    Arrow.IO.Parquet.write ~compression table filename;
     let read_table = Arrow.IO.Parquet.read filename in
     Alcotest.(check int) (Printf.sprintf "%s preserves data" name) 50 (Arrow.Table.num_rows read_table);
     let file_size = (Unix.stat filename).st_size in
@@ -301,9 +301,9 @@ let test_compression_roundtrips () =
     file_size
   in
 
-  let uncompressed_size = test_compression_type "uncompressed" Arrow.Compression.None in
-  let snappy_size = test_compression_type "snappy" Arrow.Compression.Snappy in
-  let gzip_size = test_compression_type "gzip" Arrow.Compression.Gzip in
+  let uncompressed_size = test_compression_type "uncompressed" Arrow.Parquet.Uncompressed in
+  let snappy_size = test_compression_type "snappy" Arrow.Parquet.Snappy in
+  let gzip_size = test_compression_type "gzip" (Arrow.Parquet.Gzip (Some 6)) in
 
   (* Verify compression reduces file size *)
   Alcotest.(check bool) "Snappy compresses" true (snappy_size < uncompressed_size);
@@ -317,7 +317,7 @@ let test_empty_table () =
   ] in
 
   let filename = Filename.temp_file "test_empty_" ".parquet" in
-  Arrow.Table.write_parquet table filename;
+  Arrow.IO.Parquet.write table filename;
 
   let read_table = Arrow.IO.Parquet.read filename in
   Alcotest.(check int) "Empty table rows" 0 (Arrow.Table.num_rows read_table);
@@ -334,7 +334,7 @@ let test_metadata_access () =
   let table = create_test_table ~num_rows:200 in
   let filename = Filename.temp_file "test_metadata_" ".parquet" in
 
-  Arrow.Table.write_parquet table filename ~compression:Arrow.Compression.Gzip;
+  Arrow.IO.Parquet.write ~compression:(Arrow.Parquet.Gzip (Some 6)) table filename;
 
   let metadata = Arrow.IO.Parquet.metadata filename in
   Alcotest.(check int64) "Metadata reports correct rows" 200L metadata.num_rows;
