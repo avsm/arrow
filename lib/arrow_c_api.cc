@@ -120,27 +120,6 @@ struct ArrowSchema *parquet_schema(const char *filename, int64_t *num_rows) {
   return nullptr;
 }
 
-struct ArrowSchema *alloc_schema(const char *format, const char *name) {
-  struct ArrowSchema *schema = (struct ArrowSchema*)malloc(sizeof *schema);
-  if (schema == NULL) {
-    caml_failwith("Failed to allocate ArrowSchema");
-    return NULL;
-  }
-
-  // Initialize all fields to safe defaults
-  schema->format = format ? strdup(format) : NULL;
-  schema->name = name ? strdup(name) : NULL;
-  schema->metadata = NULL;
-  schema->flags = 0;
-  schema->n_children = 0;
-  schema->children = NULL;
-  schema->dictionary = NULL;
-  schema->release = NULL;
-  schema->private_data = NULL;
-
-  return schema;
-}
-
 void free_schema(struct ArrowSchema *schema) {
   if (schema->release != NULL)
     schema->release(schema);

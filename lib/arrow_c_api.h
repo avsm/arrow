@@ -73,7 +73,6 @@ typedef void DurationBuilderPtr;
 struct ArrowSchema *arrow_schema(const char*);
 struct ArrowSchema *feather_schema(const char*);
 struct ArrowSchema *parquet_schema(const char*, int64_t *num_rows);
-struct ArrowSchema *alloc_schema(const char*, const char*);
 void free_schema(struct ArrowSchema*);
 
 TablePtr *parquet_read_table(const char *, int *col_idxs, int ncols, int use_threads, int64_t only_first);

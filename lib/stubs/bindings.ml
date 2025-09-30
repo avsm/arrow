@@ -18,7 +18,6 @@ module C (F : Cstubs.FOREIGN) = struct
     let release = field t "release" (ptr void)
     let private_data = field t "private_data" (ptr void)
     let () = seal t
-    let alloc = foreign "alloc_schema" (string @-> string @-> returning (ptr t))
     let free = foreign "free_schema" (ptr t @-> returning void)
   end
 
